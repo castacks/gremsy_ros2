@@ -78,7 +78,7 @@ gremsy_camera_stream_node:
     # Camera stream settings
     camera:
       # Stream Type Configuration
-      stream_mode: "DUAL"             # RGB, IR, DUAL
+      stream_mode: "IR"             # RGB, IR, DUAL
       rgb_enabled: true               # Enable RGB stream
       ir_enabled: true                # Enable IR stream
       

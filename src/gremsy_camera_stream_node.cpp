@@ -19,6 +19,9 @@
 // Include the payload SDK interface
 #include "payloadSdkInterface.h"
 
+#include "sensor_msgs/msg/compressed_image.hpp"
+#include <fstream>
+
 using namespace std::chrono_literals;
 using namespace std;
 
@@ -96,7 +99,7 @@ private:
         this->declare_parameter("topics.storage_info", "gimbal/camera/storage_info");
         
         // Camera parameters
-        this->declare_parameter("camera.stream_mode", "DUAL");
+        this->declare_parameter("camera.stream_mode", "RGB");
         this->declare_parameter("camera.rgb_enabled", true);
         this->declare_parameter("camera.ir_enabled", true);
         this->declare_parameter("camera.auto_start_stream", true);
@@ -120,6 +123,9 @@ private:
         this->declare_parameter("camera.recording.auto_record", false);
         this->declare_parameter("camera.recording.record_duration", 300);
         this->declare_parameter("camera.recording.record_path", "/tmp/gremsy_recordings");
+
+        this->declare_parameter("topics.rgb_compressed_stream", "gimbal/camera/rgb/image/compressed");
+        this->declare_parameter("topics.ir_compressed_stream", "gimbal/camera/ir/image/compressed");
     }
     
     void load_common_parameters() {
@@ -168,6 +174,10 @@ private:
         auto_record_ = this->get_parameter("camera.recording.auto_record").as_bool();
         record_duration_ = this->get_parameter("camera.recording.record_duration").as_int();
         record_path_ = this->get_parameter("camera.recording.record_path").as_string();
+
+        // Load compressed topic names
+        rgb_compressed_topic_ = this->get_parameter("topics.rgb_compressed_stream").as_string();
+        ir_compressed_topic_ = this->get_parameter("topics.ir_compressed_stream").as_string();
         
         // Override individual enables based on stream mode
         if (stream_mode_ == "RGB") {
@@ -258,11 +268,16 @@ private:
         if (rgb_enabled_) {
             rgb_stream_publisher_ = this->create_publisher<sensor_msgs::msg::Image>(rgb_stream_topic_, 10);
             rgb_camera_info_publisher_ = this->create_publisher<sensor_msgs::msg::CameraInfo>(rgb_camera_info_topic_, 10);
+            // Add compressed publisher
+            rgb_compressed_publisher_ = this->create_publisher<sensor_msgs::msg::CompressedImage>(rgb_compressed_topic_, 10);
+
         }
         
         if (ir_enabled_) {
             ir_stream_publisher_ = this->create_publisher<sensor_msgs::msg::Image>(ir_stream_topic_, 10);
             ir_camera_info_publisher_ = this->create_publisher<sensor_msgs::msg::CameraInfo>(ir_camera_info_topic_, 10);
+            // Add compressed publisher
+            ir_compressed_publisher_ = this->create_publisher<sensor_msgs::msg::CompressedImage>(ir_compressed_topic_, 10);
         }
         
         storage_info_publisher_ = this->create_publisher<std_msgs::msg::Float64MultiArray>(storage_info_topic_, 10);
@@ -275,6 +290,35 @@ private:
         auto timer_period = std::chrono::milliseconds(static_cast<int>(1000.0 / publish_rate_));
         stream_timer_ = this->create_wall_timer(
             timer_period, std::bind(&GremsyCameraStreamNode::publish_streams, this));
+    }
+
+    // Image publishing function
+    void publish_compressed_image(const cv::Mat& cv_image, 
+                                rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr publisher,
+                                const std::string& format = "jpeg") {
+        try {
+            auto compressed_msg = std::make_shared<sensor_msgs::msg::CompressedImage>();
+            compressed_msg->header.stamp = this->get_clock()->now();
+            compressed_msg->header.frame_id = "gimbal_camera";
+            compressed_msg->format = format;
+            
+            // Compress the image
+            std::vector<uchar> buffer;
+            std::vector<int> compression_params;
+            if (format == "jpeg") {
+                compression_params = {cv::IMWRITE_JPEG_QUALITY, 85}; // 85% quality
+                cv::imencode(".jpg", cv_image, buffer, compression_params);
+            } else if (format == "png") {
+                compression_params = {cv::IMWRITE_PNG_COMPRESSION, 3}; // 0-9 compression level
+                cv::imencode(".png", cv_image, buffer, compression_params);
+            }
+            
+            compressed_msg->data = buffer;
+            publisher->publish(*compressed_msg);
+            
+        } catch (const std::exception& e) {
+            RCLCPP_ERROR(this->get_logger(), "Error publishing compressed image: %s", e.what());
+        }
     }
 
     void initialize_camera_streaming() {
