@@ -27,10 +27,44 @@ T_ConnInfo s_conn = {
 
 void quit_handler(int sig);
 
+struct Config {
+    int device = -1;
+    int bitrate = -1;
+};
+
+// Function to parse command-line arguments
+Config parseArgs(int argc, char* argv[]) {
+    Config config;
+    int opt;
+
+    while ((opt = getopt(argc, argv, "d:b:")) != -1) {
+        switch (opt) {
+            case 'd':
+                config.device = std::atoi(optarg);
+                break;
+            case 'b':
+                config.bitrate = std::atoi(optarg);
+                break;
+            default:
+                std::cerr << "Usage: " << argv[0] << " -d <device> -b <bitrate>\n";
+                std::exit(1);
+        }
+    }
+
+    if (config.device == -1 || config.bitrate == -1) {
+        std::cerr << "Error: both -d and -b options are required.\n";
+        std::cerr << "Usage: " << argv[0] << " -d <device> -b <bitrate>\n";
+        std::exit(1);
+    }
+
+    return config;
+}
 
 int main(int argc, char *argv[]){
 	printf("Starting SendSystemTime example...\n");
 	signal(SIGINT,quit_handler);
+
+	Config cfg = parseArgs(argc, argv);
 
 	// creat payloadsdk object
 	my_payload = new PayloadSdkInterface(s_conn);
@@ -47,10 +81,9 @@ int main(int argc, char *argv[]){
 
 	while(1){
 		
-		uint32_t bitrate = 1000000; // bit per second
-		my_payload->setPayloadStreamBitrate(bitrate);
+		my_payload->setPayloadStreamBitrate(cfg.device, cfg.bitrate);
 
-		printf("The stream bitrate was set to %d. Exit \n", bitrate);
+		printf("The stream bitrate was set to %d. Exit \n", cfg.bitrate);
 
 		usleep(1000000); // 1000ms, 1Hz
 		exit(0);

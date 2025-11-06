@@ -67,38 +67,47 @@ struct {
         uint16_t msg_rate; // in ms
         uint16_t tick_ms;
 
-    } payloadParams[PARAM_COUNT] = {
+} payloadParams[PARAM_COUNT] = {
 
-        {PARAM_EO_ZOOM_LEVEL,   "EO_ZOOM", 0, 0, 0},
-        {PARAM_IR_ZOOM_LEVEL,   "IR_ZOOM", 0, 0, 0},
-        {PARAM_LRF_RANGE,       "LRF_RANGE", 0, 0, 0},
-        {PARAM_TRACK_POS_X,     "TRK_POS_X", 0, 0, 0},
-        {PARAM_TRACK_POS_Y,     "TRK_POS_Y", 0, 0, 0},
-        {PARAM_TRACK_POS_W,     "TRK_POS_W", 0, 0, 0},
-        {PARAM_TRACK_POS_H,     "TRK_POS_H", 0, 0, 0},
-        {PARAM_TRACK_STATUS,    "TRK_STATUS", 0, 0, 0},
-        {PARAM_LRF_OFSET_X,     "LRF_OFFSET_X", 0, 0, 0},
-        {PARAM_LRF_OFSET_Y,     "LRF_OFFSET_Y", 0, 0, 0},
-        {PARAM_TARGET_COOR_LON, "TARGET_LON", 0, 0, 0},
-        {PARAM_TARGET_COOR_LAT, "TARGET_LAT", 0, 0, 0},
-        {PARAM_TARGET_COOR_ALT, "TARGET_ALT", 0, 0, 0},
-        {PARAM_PAYLOAD_GPS_LON, "PAY_LON", 0, 0, 0},
-        {PARAM_PAYLOAD_GPS_LAT, "PAY_LAT", 0, 0, 0},
-        {PARAM_PAYLOAD_GPS_ALT, "PAY_ALT", 0, 0, 0},
-        {PARAM_PAYLOAD_APP_VER_X, "APP_VER_X", 0, 0, 0},
-        {PARAM_PAYLOAD_APP_VER_Y, "APP_VER_Y", 0, 0, 0},
-        {PARAM_PAYLOAD_APP_VER_Z, "APP_VER_Z", 0, 0, 0},
-        {PARAM_CAM_VIEW_MODE,       "VIEW_MODE", 0, 0, 0},
-        {PARAM_CAM_REC_SOURCE,      "REC_SRC", 0, 0, 0},
-        {PARAM_CAM_IR_TYPE,         "IR_TYPE", 0, 0, 0},
-        {PARAM_CAM_IR_PALETTE_ID,   "PALETTE_ID", 0, 0, 0},
-        {PARAM_CAM_IR_FFC_MODE,     "FFC_MODE", 0, 0, 0},
-        {PARAM_GIMBAL_MODE,         "GB_MODE", 0, 0, 0},
+    {PARAM_EO_ZOOM_LEVEL,   "EO_ZOOM", 0, 0, 0},
+    {PARAM_IR_ZOOM_LEVEL,   "IR_ZOOM", 0, 0, 0},
+    {PARAM_LRF_RANGE,       "LRF_RANGE", 0, 0, 0},
+    {PARAM_TRACK_POS_X,     "TRK_POS_X", 0, 0, 0},
+    {PARAM_TRACK_POS_Y,     "TRK_POS_Y", 0, 0, 0},
+    {PARAM_TRACK_POS_W,     "TRK_POS_W", 0, 0, 0},
+    {PARAM_TRACK_POS_H,     "TRK_POS_H", 0, 0, 0},
+    {PARAM_TRACK_STATUS,    "TRK_STATUS", 0, 0, 0},
+    {PARAM_LRF_OFSET_X,     "LRF_OFFSET_X", 0, 0, 0},
+    {PARAM_LRF_OFSET_Y,     "LRF_OFFSET_Y", 0, 0, 0},
+    {PARAM_TARGET_COOR_LON, "TARGET_LON", 0, 0, 0},
+    {PARAM_TARGET_COOR_LAT, "TARGET_LAT", 0, 0, 0},
+    {PARAM_TARGET_COOR_ALT, "TARGET_ALT", 0, 0, 0},
+    {PARAM_PAYLOAD_GPS_LON, "PAY_LON", 0, 0, 0},
+    {PARAM_PAYLOAD_GPS_LAT, "PAY_LAT", 0, 0, 0},
+    {PARAM_PAYLOAD_GPS_ALT, "PAY_ALT", 0, 0, 0},
+    {PARAM_PAYLOAD_APP_VER_X, "APP_VER_X", 0, 0, 0},
+    {PARAM_PAYLOAD_APP_VER_Y, "APP_VER_Y", 0, 0, 0},
+    {PARAM_PAYLOAD_APP_VER_Z, "APP_VER_Z", 0, 0, 0},
+    {PARAM_CAM_VIEW_MODE,       "VIEW_MODE", 0, 0, 0},
+    {PARAM_CAM_REC_SOURCE,      "REC_SRC", 0, 0, 0},
+    {PARAM_CAM_IR_TYPE,         "IR_TYPE", 0, 0, 0},
+    {PARAM_CAM_IR_PALETTE_ID,   "PALETTE_ID", 0, 0, 0},
+    {PARAM_CAM_IR_FFC_MODE,     "FFC_MODE", 0, 0, 0},
+    {PARAM_GIMBAL_MODE,         "GB_MODE", 0, 0, 0},
 
-        {PARAM_IR_TEMP_MAX,         "IR_TEMP_MAX", 0, 0, 0},
-        {PARAM_IR_TEMP_MIN,         "IR_TEMP_MIN", 0, 0, 0},
-        {PARAM_IR_TEMP_MEAN,         "IR_TEMP_MEAN", 0, 0, 0},
-    };
+    {PARAM_IR_TEMP_MAX,         "IR_TEMP_MAX", 0, 0, 0},
+    {PARAM_IR_TEMP_MIN,         "IR_TEMP_MIN", 0, 0, 0},
+    {PARAM_IR_TEMP_MEAN,         "IR_TEMP_MEAN", 0, 0, 0},
+};
+
+typedef enum{
+    PAYLOADSDK_ZOOM_IN    = 1,
+    PAYLOADSDK_ZOOM_OUT   = -1,
+    PAYLOADSDK_ZOOM_STOP  = 0,
+    PAYLOADSDK_ZOOM_WIDE  = 2,
+    PAYLOADSDK_ZOOM_TELE  = 3,
+    PAYLOADSDK_ZOOM_POS   = 4
+}payloadsdk_zoom_mode_t;
 
 static std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();;
 static long long _getElapsedTimeInMs(){
@@ -308,7 +317,7 @@ public:
 
     // set stream bitrate
     // bitrate is in bit per second
-    void setPayloadStreamBitrate(uint32_t bitrate);
+    void setPayloadStreamBitrate(uint32_t cam_id, uint32_t bitrate);
 
     // get the current stream bitrate
     uint32_t getPayloadStreamBitrate(); 
@@ -349,6 +358,13 @@ public:
      * (ZOOM_OUT, ZOOM_STOP, ZOOM_IN)
      * */
     void setCameraZoom(float zoomType,float zoomValue);
+
+    /**
+     * Custom command for zooming to the specific target
+     * @target the zoom level need to be reached, from 1x to 25x (Dz Off) or 300x (Combine zoom)
+     **/
+    void setCameraZoomTarget(float target_level);
+
     /**
      * set camera focus
      * (FOCUS_OUT, FOCUS_STOP, FOCUS_IN)
