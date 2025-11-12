@@ -353,6 +353,17 @@ public:
      * @para4 : Angular rate or angle mode
      * */
     void setGimbalSpeed(float spd_pitch, float spd_roll, float spd_yaw, input_mode_t mode);
+
+    /**
+     * Set gimbal angle
+     * Use this function for control the gimbal over the limitation of the quatenion
+     * If the yaw angle out of the range (-180:180)
+     * If the pitch angle out of the range (-90:90)
+     * If do angle control, the unit is degrees
+     * * If do speed control, the unit is degrees/s
+     **/
+    void setGimbalMovement(float pitch, float roll, float yaw, input_mode_t mode);
+
     /**
      * set camera zoom ZOOM_TYPE_CONTINUOUS
      * (ZOOM_OUT, ZOOM_STOP, ZOOM_IN)

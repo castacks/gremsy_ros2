@@ -1100,6 +1100,38 @@ setGimbalSpeed(float spd_pitch, float spd_roll, float spd_yaw, input_mode_t mode
     payload_interface->push_message_to_queue(message);
 }
 
+void 
+PayloadSdkInterface::
+setGimbalMovement(float pitch, float roll, float yaw, input_mode_t mode){
+    mavlink_command_long_t msg = {0};
+
+    msg.target_system = GIMBAL_SYSTEM_ID;
+    msg.target_component = GIMBAL_COMPONENT_ID;
+    msg.command = MAV_CMD_DO_MOUNT_CONTROL;
+    msg.confirmation = 1;
+
+    msg.param1 = pitch;
+    msg.param2 = roll;
+    msg.param3 = yaw;
+
+    msg.param6 = (float)mode;
+    msg.param7 = (float)MAV_MOUNT_MODE_MAVLINK_TARGETING;
+
+    // --------------------------------------------------------------------------
+    //   ENCODE
+    // --------------------------------------------------------------------------
+    mavlink_message_t message;
+
+    mavlink_msg_command_long_encode_chan(SYS_ID, COMP_ID, port->get_mav_channel(), &message, &msg);
+
+    // --------------------------------------------------------------------------
+    //   WRITE
+    // --------------------------------------------------------------------------
+
+    // do the write
+    payload_interface->push_message_to_queue(message);
+}
+
 void
 PayloadSdkInterface::
 setCameraZoom(float zoomType,float zoomValue)
