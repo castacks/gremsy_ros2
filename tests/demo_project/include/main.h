@@ -8,13 +8,6 @@
 #include <iostream>
 #include <chrono>
 
-#if defined MB1
-#include "mb1_sdk.h"
-#elif defined VIO || defined ORUSL
-#include "vio_sdk.h"
-#elif defined ZIO
-#include "zio_sdk.h"
-#endif
 /**/
 PayloadSdkInterface* my_payload = nullptr;
 

@@ -1,5 +1,5 @@
-#ifndef VIO_SDK_H
-#define VIO_SDK_H
+#ifndef ORUSL_SDK_H
+#define ORUSL_SDK_H
 
 // Tracking modes
 #define PAYLOAD_CAMERA_TRACKING_MODE 	"TRACK_MODE"

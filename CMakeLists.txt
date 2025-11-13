@@ -25,7 +25,7 @@ endif(ZIO)
 if (ORUSL)
 set(ORUSL $ENV{ORUSL})
 message("-- ORUSL: ${ORUSL}")
-add_definitions(-DVIO=${ORUSL})
+add_definitions(-DORUSL=${ORUSL})
 endif(ORUSL)
 
 find_package(PkgConfig REQUIRED)
