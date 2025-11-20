@@ -78,6 +78,7 @@ public:
     void update_gimbal_attitude(float pitch, float roll, float yaw);
     void update_payload_status(double* params);
     void update_payload_param(char* index, double value);
+    void update_rtsp_url_from_ip(const std::string& ip);
 
     void play_stream(const std::string& rtsp_url);
     void stop_stream();

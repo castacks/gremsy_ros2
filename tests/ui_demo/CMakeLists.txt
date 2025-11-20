@@ -17,6 +17,10 @@ include_directories(${GTKMM_INCLUDE_DIRS}
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui_gtk
                     ${CMAKE_CURRENT_SOURCE_DIR}/ui_gtk/PayloadControlTab
+                    ${CMAKE_SOURCE_DIR}/libs
+                    ${CMAKE_SOURCE_DIR}/libs/payload-define
+                    ${CMAKE_SOURCE_DIR}/libs/third-party/mavlink/include
+                    ${CMAKE_SOURCE_DIR}/libs/third-party/mavlink/include/mavlink/v2.0
                     )
 
 link_directories(${GTKMM_LIBRARY_DIRS} ${GSTREAMER_LIBRARY_DIRS})

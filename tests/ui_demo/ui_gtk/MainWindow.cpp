@@ -47,8 +47,9 @@ create_connect_ip(){
 
     ip_entry = Gtk::make_managed<Gtk::Entry>();
     ip_entry->set_size_request(300, -1);
-    ip_entry->set_placeholder_text("rtsp://example.com:554/stream");
-    ip_entry->set_text("192.168.15.250");
+    ip_entry->set_placeholder_text("Enter your payload IP address");
+    ip_entry->set_text("192.168.55.1");
+    ip_entry->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_ip_entry_changed));
 
     ip_box->pack_start(*ip_entry, Gtk::PACK_EXPAND_WIDGET);
     
@@ -180,5 +181,17 @@ MainWindow::
 update_url_streaming(char* url){
     if (payload_tab) {
         payload_tab->update_url_streaming(url);
+    }
+}
+
+void
+MainWindow::
+on_ip_entry_changed(){
+    if (payload_tab && ip_entry) {
+        std::string ip = ip_entry->get_text();
+        // Only update if IP is not empty
+        if (!ip.empty()) {
+            payload_tab->update_rtsp_url_from_ip(ip);
+        }
     }
 }

@@ -1279,6 +1279,17 @@ update_url_streaming(const char* url){
 
 void
 PayloadSettingsTab::
+update_rtsp_url_from_ip(const std::string& ip){
+    if(url_entry == nullptr) return;
+    // Construct RTSP URL from IP: rtsp://IP:8554/payload
+    std::string rtsp_url = "rtsp://" + ip + ":8554/payload";
+    Glib::signal_idle().connect_once([this, rtsp_url]() {
+        url_entry->set_text(rtsp_url);
+    });
+}
+
+void
+PayloadSettingsTab::
 query_payload_param(){
     double params[1] = {0.0};
     on_button_clicked(QUERY_PAYLOAD_PARAM, params);

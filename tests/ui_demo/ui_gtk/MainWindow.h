@@ -51,6 +51,7 @@ private:
     Gtk::Widget* create_connect_ip();
     void on_payload_button_clicked(_index_notify index, double* param);
     void on_connect_button_clicked(_index_notify index, const char* param);
+    void on_ip_entry_changed();
 
 };
 
