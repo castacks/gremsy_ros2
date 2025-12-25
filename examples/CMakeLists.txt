@@ -83,7 +83,6 @@ set(EXAMPLES
     camera_change_settings.cpp
     camera_eo_capture_image.cpp
     camera_eo_record_video.cpp
-    camera_eo_set_zoom_focus.cpp
     camera_ir_set_zoom.cpp
     camera_ir_capture_image.cpp
     camera_ir_record_video.cpp

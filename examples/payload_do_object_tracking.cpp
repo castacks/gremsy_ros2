@@ -76,11 +76,7 @@ int main(int argc, char *argv[]){
 	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_VIEW_SRC, PAYLOAD_CAMERA_VIEW_EO, PARAM_TYPE_UINT32);
 	#endif
 	// change tracking mode to Object tracking
-    #if defined VIO
 	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_TRACKING_MODE, PAYLOAD_CAMERA_TRACKING_OBJ_TRACKING, PARAM_TYPE_UINT32);
-	#elif defined MB1 || defined ZIO
-	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_OBJECT_DETECTION, PAYLOAD_CAMERA_OBJECT_DETECTION_DISABLE, PARAM_TYPE_UINT32);
-    #endif
 	// change OSD mode to Status
 	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_VIDEO_OSD_MODE, PAYLOAD_CAMERA_VIDEO_OSD_MODE_STATUS, PARAM_TYPE_UINT32);
 

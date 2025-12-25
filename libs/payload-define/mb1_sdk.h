@@ -39,7 +39,6 @@ enum _zoom_eo_factor{
 #define PAYLOAD_CAMERA_VIEW_EO                  1
 #define PAYLOAD_CAMERA_VIEW_IR                  2
 #define PAYLOAD_CAMERA_VIEW_IREO                3
-#define PAYLOAD_CAMERA_VIEW_SYNC                4
 
 #define PAYLOAD_CAMERA_RECORD_SRC             "C_V_REC"
 #define PAYLOAD_CAMERA_RECORD_BOTH              0
@@ -74,6 +73,11 @@ enum _zoom_eo_factor{
 #define PAYLOAD_CAMERA_IR_ISOTHERMS_GAIN         	"ISOTHERMS_GAIN"
 #define PAYLOAD_CAMERA_IR_ISOTHERMS_HIGH_GAIN 		    0
 #define PAYLOAD_CAMERA_IR_ISOTHERMS_LOW_GAIN 	        1
+
+// Tracking modes
+#define PAYLOAD_CAMERA_TRACKING_MODE 	"TRACK_MODE"
+#define PAYLOAD_CAMERA_TRACKING_OBJ_TRACKING 	    0
+#define PAYLOAD_CAMERA_TRACKING_OBJ_DETECTION 		1
 
 enum Camera_Zoom_Value
 {
