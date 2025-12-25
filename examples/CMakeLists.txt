@@ -87,12 +87,14 @@ set(EXAMPLES
     camera_ir_capture_image.cpp
     camera_ir_record_video.cpp
     camera_ir_set_palette.cpp
+    camera_ir_isotherm_profile.cpp
     camera_time_lapse_photography.cpp
 
     gimbal_move_angle.cpp
     gimbal_move_speed.cpp
     gimbal_set_mode.cpp
     gimbal_control_example.cpp
+    gimbal_load_settings.cpp
 
     payload_get_status.cpp
     payload_download_media_files.cpp
@@ -100,6 +102,8 @@ set(EXAMPLES
     payload_do_object_detection.cpp
     payload_get_video_streaming.cpp
     payload_extract_tiff_file.cpp
+    payload_set_gps.cpp
+    payload_get_fov_status.cpp
 )
 endif(MB1)
 
