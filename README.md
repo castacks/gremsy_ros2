@@ -110,9 +110,13 @@ make -j$(nproc)
 The UI Demo is more than just a testing tool—it's a **complete reference implementation** showing how to integrate all PayloadSDK features into a professional application. Perfect for:
 
 ✅ **Evaluation**: Test all payload capabilities before integration
+
 ✅ **Development**: Reference implementation for your own applications
+
 ✅ **Demonstration**: Showcase payload features to clients
+
 ✅ **Testing**: Validate payload configurations and functionality
+
 ✅ **Training**: Learn the SDK through interactive examples
 
 ### 🚀 Launch UI Demo
