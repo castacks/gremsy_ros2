@@ -12,32 +12,41 @@ MainWindow::MainWindow(int width, int height) {
 
     main_box.pack_start(*create_connect_ip(), Gtk::PACK_SHRINK);
 
+    // Create scrolled window for tab content
+    auto scrolled_window = Gtk::make_managed<Gtk::ScrolledWindow>();
+    scrolled_window->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    scrolled_window->set_vexpand(true);
+    scrolled_window->set_hexpand(true);
+
     tab_content.set_orientation(Gtk::ORIENTATION_VERTICAL);
-    tab_content.set_margin_top(10);
+    tab_content.set_margin_top(5);
     tab_content.set_margin_bottom(10);
-    tab_content.set_margin_start(10);
-    tab_content.set_margin_end(10);
+    tab_content.set_hexpand(true);
+    tab_content.set_vexpand(true);
 
     payload_tab = Gtk::make_managed<PayloadSettingsTab>();
     payload_tab->signal_button_clicked().connect(sigc::mem_fun(*this, &MainWindow::on_payload_button_clicked));
     payload_tab->set_sensitive(false);
+    payload_tab->set_hexpand(true);
 
     tab_content.pack_start(*payload_tab, Gtk::PACK_EXPAND_WIDGET);
-    tab_content.set_hexpand(true);
-    main_box.pack_start(tab_content);
+
+    scrolled_window->add(tab_content);
+    main_box.pack_start(*scrolled_window, Gtk::PACK_EXPAND_WIDGET);
 
     show_all_children();
 }
 
-Gtk::Widget* 
+Gtk::Widget*
 MainWindow::
 create_connect_ip(){
     auto frame = Gtk::make_managed<Gtk::Frame>("IP");
-    frame->set_halign(Gtk::ALIGN_START);
+    frame->set_halign(Gtk::ALIGN_FILL);
     frame->set_valign(Gtk::ALIGN_CENTER);
     frame->set_margin_top(10);
-    frame->set_margin_start(30);
+    frame->set_margin_start(10);
     frame->set_margin_end(10);
+    frame->set_margin_bottom(5);
 
     auto ip_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
     ip_box->set_margin_top(10);
@@ -48,13 +57,13 @@ create_connect_ip(){
     ip_entry = Gtk::make_managed<Gtk::Entry>();
     ip_entry->set_size_request(300, -1);
     ip_entry->set_placeholder_text("Enter your payload IP address");
-    ip_entry->set_text("192.168.55.1");
+    ip_entry->set_text(udp_ip_target);
     ip_entry->signal_changed().connect(sigc::mem_fun(*this, &MainWindow::on_ip_entry_changed));
 
     ip_box->pack_start(*ip_entry, Gtk::PACK_EXPAND_WIDGET);
-    
+
     btn_connect = Gtk::make_managed<Gtk::Button>("Connect");
-    ip_entry->set_size_request(150, -1);
+    btn_connect->set_size_request(150, -1);
     btn_connect->signal_clicked().connect([this]() {
         if(!is_connected){
             printf("debug 1\n");
@@ -67,11 +76,11 @@ create_connect_ip(){
         }
 
     });
-    ip_box->pack_start(*btn_connect, Gtk::PACK_EXPAND_WIDGET);
+    ip_box->pack_start(*btn_connect, Gtk::PACK_SHRINK);
 
     connect_info = Gtk::make_managed<Gtk::Label>("  Disconnected ");
     connect_info->set_markup("<span color='red'>  Disconnected </span>");
-    ip_box->pack_start(*connect_info, Gtk::PACK_EXPAND_WIDGET);
+    ip_box->pack_start(*connect_info, Gtk::PACK_SHRINK);
 
     frame->add(*ip_box);
     return frame;

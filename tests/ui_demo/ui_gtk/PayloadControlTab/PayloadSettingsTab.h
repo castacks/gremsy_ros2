@@ -13,7 +13,14 @@
 #include <gdk/gdkx.h>
 
 #include "payloadSdkInterface.h"
-#include "vio_sdk.h"
+
+#if defined MB1
+    #include "mb1_sdk.h"
+#elif defined VIO
+    #include "vio_sdk.h"
+#elif defined ORUSL
+    #include "orusl_sdk.h"
+#endif
 
 enum _index_notify{
     CAM_VIEW_MODE = 0,
@@ -48,7 +55,31 @@ enum _index_notify{
     GIMBAL_MODE,
     CONNECT_PAYLOAD,
     DISCONNECT_PAYLOAD,
-    QUERY_PAYLOAD_PARAM
+    QUERY_PAYLOAD_PARAM,
+#ifdef MB1
+    // MB1-specific controls
+    CAM_SETTING_TARGET,
+    CAM_RC_MODE,
+    CAM_STORAGE_TYPE,
+    CAM_EO_SCENE_MODE,
+    CAM_EO_AE_COMPENSATION,
+    CAM_EO_WHITE_BALANCE,
+    CAM_EO_ISO,
+    CAM_EO_SHARPNESS,
+    CAM_IR_GAIN_MODE,
+    CAM_IR_CONTRAST_MODE,
+    CAM_IR_AGC_MODE,
+    CAM_IR_AGC_LINEAR_PERCENT,
+    CAM_IR_SPOTMETER_MODE,
+    CAM_IR_SPOTMETER_UNITS,
+    CAM_IR_SPOTMETER_SIZE,
+    CAM_IR_ISOTHERM_MODE,
+    CAM_IR_ISOTHERM_UNITS,
+    CAM_IR_ISOTHERM_THRESHOLD,
+    CAM_GIMBAL_FW_FLAG,
+    CAM_OBJECT_DETECTION,
+    CAM_IR_ISOTHERMS_GAIN
+#endif
 };
 
 struct list_struct_t {
@@ -105,6 +136,15 @@ private:
     Gtk::Widget* create_lrf_mode_group();
     Gtk::Widget* create_osd_mode_group();
     Gtk::Widget* create_image_flip_group();
+
+#ifdef MB1
+    // MB1-specific group creation methods
+    Gtk::Widget* create_mb1_general_settings_group();
+    Gtk::Widget* create_mb1_eo_advanced_group();
+    Gtk::Widget* create_mb1_ir_advanced_group();
+    Gtk::Widget* create_mb1_ir_spotmeter_group();
+    Gtk::Widget* create_mb1_ir_isotherm_group();
+#endif
 
     // Group Gimbal Setting
     Gtk::Widget* create_gimbal_control_speed_group();
@@ -176,6 +216,33 @@ private:
     Gtk::ComboBoxText* image_flip_combo   = nullptr;
     Gtk::ComboBoxText* gimbal_mode_combo   = nullptr;
     Gtk::ComboBoxText* track_mode_combo   = nullptr;
+
+#ifdef MB1
+    // MB1-specific combo boxes
+    Gtk::ComboBoxText* setting_target_combo = nullptr;
+    Gtk::ComboBoxText* rc_mode_combo = nullptr;
+    Gtk::ComboBoxText* storage_type_combo = nullptr;
+    Gtk::ComboBoxText* eo_scene_mode_combo = nullptr;
+    Gtk::ComboBoxText* eo_wb_combo = nullptr;
+    Gtk::ComboBoxText* eo_iso_combo = nullptr;
+    Gtk::ComboBoxText* ir_gain_mode_combo = nullptr;
+    Gtk::ComboBoxText* ir_contrast_mode_combo = nullptr;
+    Gtk::ComboBoxText* ir_agc_mode_combo = nullptr;
+    Gtk::ComboBoxText* ir_spotmeter_mode_combo = nullptr;
+    Gtk::ComboBoxText* ir_spotmeter_units_combo = nullptr;
+    Gtk::ComboBoxText* ir_isotherm_mode_combo = nullptr;
+    Gtk::ComboBoxText* ir_isotherm_units_combo = nullptr;
+    Gtk::ComboBoxText* object_detection_combo = nullptr;
+    Gtk::ComboBoxText* ir_isotherms_gain_combo = nullptr;
+    Gtk::ComboBoxText* gimbal_fw_flag_combo = nullptr;
+
+    // MB1-specific scales
+    Gtk::Scale* eo_ae_compensation_range = nullptr;
+    Gtk::Scale* eo_sharpness_range = nullptr;
+    Gtk::Scale* ir_agc_linear_percent_range = nullptr;
+    Gtk::Scale* ir_spotmeter_size_range = nullptr;
+    Gtk::Scale* ir_isotherm_threshold_range = nullptr;
+#endif
 
     Gtk::Label* storage_info = nullptr;
     Gtk::Label* capture_info = nullptr;
@@ -351,6 +418,127 @@ private:
         {"Detection", 1}
     };
 
+#ifdef MB1
+    // MB1-specific list data
+    list_struct_t mb1_setting_target_list[3] = {
+        {"EO Camera",     0},
+        {"IR Camera",     1},
+        {"Gimbal Device", 2}
+    };
+
+    list_struct_t mb1_rc_mode_list[2] = {
+        {"Gremsy",   0},
+        {"Standard", 1}
+    };
+
+    list_struct_t mb1_storage_type_list[2] = {
+        {"Internal", 0},
+        {"SD Card",  1}
+    };
+
+    list_struct_t mb1_eo_scene_mode_list[17] = {
+        {"Disabled",        0},
+        {"Face-priority",   1},
+        {"Action",          2},
+        {"Portrait",        3},
+        {"Landscape",       4},
+        {"Night",           5},
+        {"Night-portrait",  6},
+        {"Theatre",         7},
+        {"Beach",           8},
+        {"Snow",            9},
+        {"Sunset",         10},
+        {"Steady-photo",   11},
+        {"Fireworks",      12},
+        {"Sports",         13},
+        {"Party",          14},
+        {"Candlelight",    15},
+        {"HDR",            16}
+    };
+
+    list_struct_t mb1_eo_wb_list[11] = {
+        {"Off",                0},
+        {"Manual CC Temp",     1},
+        {"Manual RGB Gains",   2},
+        {"Auto",               3},
+        {"Shade",              4},
+        {"Incandescent",       5},
+        {"Fluorescent",        6},
+        {"Warm Fluorescent",   7},
+        {"Daylight",           8},
+        {"Cloudy Daylight",    9},
+        {"Twilight",          10}
+    };
+
+    list_struct_t mb1_eo_iso_list[8] = {
+        {"Auto",   0},
+        {"Deblur", 1},
+        {"100",    2},
+        {"200",    3},
+        {"400",    4},
+        {"800",    5},
+        {"1600",   6},
+        {"3200",   7}
+    };
+
+    list_struct_t mb1_ir_gain_mode_list[2] = {
+        {"Low (-50~150°C)",  0},
+        {"High (-50~550°C)", 1}
+    };
+
+    list_struct_t mb1_ir_contrast_mode_list[2] = {
+        {"Default", 0},
+        {"Custom",  1}
+    };
+
+    list_struct_t mb1_ir_agc_mode_list[6] = {
+        {"Normal",    0},
+        {"Hold",      1},
+        {"Threshold", 2},
+        {"Bright",    3},
+        {"Linear",    4},
+        {"Manual",    5}
+    };
+
+    list_struct_t mb1_ir_spotmeter_mode_list[2] = {
+        {"Disable", 0},
+        {"Enable",  1}
+    };
+
+    list_struct_t mb1_ir_spotmeter_units_list[3] = {
+        {"Celsius",    0},
+        {"Fahrenheit", 1},
+        {"Kelvin",     2}
+    };
+
+    list_struct_t mb1_ir_isotherm_mode_list[2] = {
+        {"Disable", 0},
+        {"Enable",  1}
+    };
+
+    list_struct_t mb1_ir_isotherm_units_list[5] = {
+        {"Kelvin",      0},
+        {"Celsius",     1},
+        {"Fahrenheit",  2},
+        {"Percent",     3},
+        {"Counts (Raw)", 4}
+    };
+
+    list_struct_t mb1_object_detection_list[2] = {
+        {"Disable", 0},
+        {"Enable",  1}
+    };
+
+    list_struct_t mb1_ir_isotherms_gain_list[2] = {
+        {"High Gain", 0},
+        {"Low Gain",  1}
+    };
+
+    list_struct_t mb1_gimbal_fw_flag_list[2] = {
+        {"Overwrite", 0},
+        {"Forward",   1}
+    };
+#endif
 
     std::map<Gtk::Button*, sigc::connection> m_button_timers;
     double speed_gimbal = 0.0;
@@ -359,10 +547,17 @@ private:
     Gtk::Entry* url_entry = nullptr;
     Gtk::Button* play_button = nullptr;
     Gtk::Button* stop_button = nullptr;
+    Gtk::Button* fullscreen_button = nullptr;
     Gtk::ToggleButton* touch_button = nullptr;
     Gtk::ToggleButton* track_button = nullptr;
     Gtk::DrawingArea* video_area = nullptr;
-    
+
+    // Fullscreen components
+    Gtk::Window* fullscreen_window = nullptr;
+    Gtk::DrawingArea* fullscreen_video_area = nullptr;
+    guintptr fullscreen_window_handle = 0;
+    bool is_fullscreen = false;
+
     // GStreamer components
     GstElement* pipeline = nullptr;
     GstElement* source = nullptr;
@@ -371,13 +566,19 @@ private:
     GstElement* videoconvert = nullptr;
     GstElement* videosink = nullptr;
     GstBus* bus = nullptr;
-    
+
     // Video window
     guintptr video_window_handle = 0;
     bool is_playing = false;
 
     bool is_touch = false;
     int is_track = 0;
+
+    // Fullscreen methods
+    void toggle_fullscreen();
+    void enter_fullscreen();
+    void exit_fullscreen();
+    bool on_fullscreen_key_press(GdkEventKey* event);
 
 };
 

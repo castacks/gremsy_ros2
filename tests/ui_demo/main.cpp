@@ -231,6 +231,114 @@ void onUICommandChanged(int event, double* param){
 
             break;
         }
+#ifdef MB1
+        // MB1-specific command handling
+        case CAM_SETTING_TARGET:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_SETTING_TARGET, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_RC_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_RC_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_STORAGE_TYPE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_STORAGE_TYPE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_EO_SCENE_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_EO_SCENE_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_EO_AE_COMPENSATION:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_EO_AE_COMPENSATION, (int)param[0], PARAM_TYPE_INT32);
+            break;
+        }
+        case CAM_EO_WHITE_BALANCE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_EO_WHITE_BALANCE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_EO_ISO:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_EO_ISO, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_EO_SHARPNESS:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_EO_SHARPNESS, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_GAIN_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_GAIN, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_CONTRAST_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_CONTRAST_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_AGC_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_AGC_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_AGC_LINEAR_PERCENT:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_AGC_LINEAR_PERCENT, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_SPOTMETER_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_SPOTMETER_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_SPOTMETER_UNITS:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_SPOTMETER_UNITS, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_SPOTMETER_SIZE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_SPOTMETER_SIZE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_ISOTHERM_MODE:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_ISOTHERM_MODE, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_ISOTHERM_UNITS:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_ISOTHERM_UNITS, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_ISOTHERM_THRESHOLD:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_ISOTHERM_THRESHOLD, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_GIMBAL_FW_FLAG:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_GIMBAL_FW_FLAG, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_OBJECT_DETECTION:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_OBJECT_DETECTION, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+        case CAM_IR_ISOTHERMS_GAIN:{
+            if(my_payload != nullptr)
+                my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_IR_ISOTHERMS_GAIN, (int)param[0], PARAM_TYPE_UINT32);
+            break;
+        }
+#endif
         default: break;
     }
 }

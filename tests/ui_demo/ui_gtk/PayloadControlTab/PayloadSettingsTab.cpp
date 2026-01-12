@@ -2,15 +2,14 @@
 
 
 PayloadSettingsTab::PayloadSettingsTab() : Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10) {
-    set_margin_start(10);
-    set_margin_end(10);
+    set_hexpand(true);
 
     // Initialize GStreamer
     if (!gst_is_initialized()) {
         gst_init(nullptr, nullptr);
     }
 
-    pack_start(*create_main_tab(), Gtk::PACK_SHRINK);
+    pack_start(*create_main_tab(), Gtk::PACK_EXPAND_WIDGET);
 
 }
 
@@ -18,31 +17,36 @@ PayloadSettingsTab::~PayloadSettingsTab() {
     cleanup_gstreamer();
 }
 
-Gtk::Widget* 
+Gtk::Widget*
 PayloadSettingsTab::
 create_main_tab(){
     auto frame = Gtk::make_managed<Gtk::Frame>();
-    frame->set_size_request(-1, -1);
-    frame->set_halign(Gtk::ALIGN_START);
+    frame->set_halign(Gtk::ALIGN_FILL);
     frame->set_valign(Gtk::ALIGN_START);
+    frame->set_hexpand(true);
+    frame->set_margin_start(10);
+    frame->set_margin_end(10);
 
     auto mainbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
-    mainbox->set_margin_top(10);
+    mainbox->set_margin_top(0);
     mainbox->set_margin_bottom(10);
     mainbox->set_margin_start(10);
     mainbox->set_margin_end(10);
+    mainbox->set_hexpand(true);
 
-    auto box_1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
+    auto box_1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 0);
+    box_1->set_valign(Gtk::ALIGN_START);
 
     box_1->pack_start(*create_video_interface(), Gtk::PACK_SHRINK);
     box_1->pack_start(*create_payload_setting_main_group(), Gtk::PACK_SHRINK);
 
     auto box_2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
+    box_2->set_valign(Gtk::ALIGN_START);
     box_2->pack_start(*create_camera_setting_main_group(), Gtk::PACK_SHRINK);
     box_2->pack_start(*create_gimbal_setting_main_group(), Gtk::PACK_SHRINK);
     box_2->pack_start(*create_info_show_main_group(), Gtk::PACK_SHRINK);
 
-    mainbox->pack_start(*box_1, Gtk::PACK_EXPAND_WIDGET);
+    mainbox->pack_start(*box_1, Gtk::PACK_SHRINK);
     mainbox->pack_start(*box_2, Gtk::PACK_EXPAND_WIDGET);
 
     frame->add(*mainbox);
@@ -51,31 +55,32 @@ create_main_tab(){
 }
 
 // ===== Payload Setting Main Group =====
-Gtk::Widget* 
+Gtk::Widget*
 PayloadSettingsTab::
 create_payload_setting_main_group() {
-    auto frame = Gtk::make_managed<Gtk::Frame>();
+    auto frame = Gtk::make_managed<Gtk::Frame>("Payload Settings");
     this->signal_size_allocate().connect([frame](Gtk::Allocation& alloc){
         int parent_width = alloc.get_width();
         frame->set_size_request(parent_width * 0.35, 50);
     });
     frame->set_halign(Gtk::ALIGN_START);
     frame->set_valign(Gtk::ALIGN_START);
+    frame->set_margin_top(0);
 
     auto mainbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
-    mainbox->set_margin_top(10);
+    mainbox->set_margin_top(0);
     mainbox->set_margin_bottom(10);
     mainbox->set_margin_start(10);
     mainbox->set_margin_end(10);
 
     auto box_1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
-    box_1->set_margin_top(10);
+    box_1->set_margin_top(0);
     box_1->set_margin_bottom(10);
     box_1->set_margin_start(10);
     box_1->set_margin_end(10);
     
     
-    auto cam_frame = Gtk::make_managed<Gtk::Frame>();
+    auto cam_frame = Gtk::make_managed<Gtk::Frame>("Camera View & Record");
 
     auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
     hbox->set_margin_top(10);
@@ -97,9 +102,15 @@ create_payload_setting_main_group() {
     box_2->set_margin_start(10);
     box_2->set_margin_end(10);
 
+#ifndef MB1
     box_2->pack_start(*create_lrf_mode_group(), Gtk::PACK_SHRINK);
+#endif
     box_2->pack_start(*create_osd_mode_group(), Gtk::PACK_SHRINK);
     box_2->pack_start(*create_image_flip_group(), Gtk::PACK_SHRINK);
+
+#ifdef MB1
+    box_2->pack_start(*create_mb1_general_settings_group(), Gtk::PACK_SHRINK);
+#endif
 
     mainbox->pack_start(*box_1, Gtk::PACK_SHRINK);
     mainbox->pack_start(*box_2, Gtk::PACK_EXPAND_WIDGET);
@@ -109,7 +120,7 @@ create_payload_setting_main_group() {
 }
 
 // ===== Camera Setting Main Group =====
-Gtk::Widget* 
+Gtk::Widget*
 PayloadSettingsTab::
 create_camera_setting_main_group() {
     auto frame = Gtk::make_managed<Gtk::Frame>("Camera Setting");
@@ -120,15 +131,26 @@ create_camera_setting_main_group() {
     frame->set_halign(Gtk::ALIGN_START);
     frame->set_valign(Gtk::ALIGN_START);
     auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
-    box->set_margin_top(10);
+    box->set_margin_top(0);
     box->set_margin_bottom(10);
     box->set_margin_start(10);
     box->set_margin_end(10);
 
     box->pack_start(*create_zoom_controls_group(), Gtk::PACK_SHRINK);
+#ifndef MB1
     box->pack_start(*create_focus_controls_group(), Gtk::PACK_SHRINK);
+#endif
+
+#ifdef MB1
+    box->pack_start(*create_mb1_eo_advanced_group(), Gtk::PACK_SHRINK);
+    box->pack_start(*create_mb1_ir_advanced_group(), Gtk::PACK_SHRINK);
+    box->pack_start(*create_mb1_ir_spotmeter_group(), Gtk::PACK_SHRINK);
+    box->pack_start(*create_mb1_ir_isotherm_group(), Gtk::PACK_SHRINK);
+#else
     box->pack_start(*create_exposure_group(), Gtk::PACK_SHRINK);
     box->pack_start(*create_white_balance_group(), Gtk::PACK_SHRINK);
+#endif
+
     box->pack_start(*create_ir_palette_group(), Gtk::PACK_SHRINK);
 
     frame->add(*box);
@@ -136,7 +158,7 @@ create_camera_setting_main_group() {
 }
 
 // ===== Gimbal Setting Main Group =====
-Gtk::Widget* 
+Gtk::Widget*
 PayloadSettingsTab::
 create_gimbal_setting_main_group() {
     auto frame = Gtk::make_managed<Gtk::Frame>("Gimbal Setting");
@@ -147,7 +169,7 @@ create_gimbal_setting_main_group() {
     frame->set_halign(Gtk::ALIGN_START);
     frame->set_valign(Gtk::ALIGN_START);
     auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
-    box->set_margin_top(10);
+    box->set_margin_top(0);
     box->set_margin_bottom(10);
     box->set_margin_start(10);
     box->set_margin_end(10);
@@ -161,7 +183,7 @@ create_gimbal_setting_main_group() {
 }
 
 // ===== Info Main Group =====
-Gtk::Widget* 
+Gtk::Widget*
 PayloadSettingsTab::
 create_info_show_main_group() {
     auto frame = Gtk::make_managed<Gtk::Frame>("Payload Info");
@@ -173,7 +195,7 @@ create_info_show_main_group() {
     frame->set_valign(Gtk::ALIGN_START);
 
     auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
-    box->set_margin_top(10);
+    box->set_margin_top(0);
     box->set_margin_bottom(10);
     box->set_margin_start(10);
     box->set_margin_end(10);
@@ -647,49 +669,52 @@ create_gimbal_control_angle_group() {
     return frame;
 }
 
-Gtk::Widget*  
+Gtk::Widget*
 PayloadSettingsTab::
 create_video_interface() {
     auto frame = Gtk::make_managed<Gtk::Frame>();
-    this->signal_size_allocate().connect([frame](Gtk::Allocation& alloc){
-        int parent_width = alloc.get_width();
-        frame->set_size_request(parent_width * 0.35, 50);
-    });
-    frame->set_halign(Gtk::ALIGN_START);
+    frame->set_halign(Gtk::ALIGN_FILL);
     frame->set_valign(Gtk::ALIGN_START);
+    frame->set_hexpand(true);
+    frame->set_shadow_type(Gtk::SHADOW_NONE);
 
-    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 10);
-    box->set_margin_top(10);
-    box->set_margin_bottom(10);
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(0);
+    box->set_margin_bottom(0);
     box->set_margin_start(10);
     box->set_margin_end(10);
 
     // URL input section
     auto url_frame = Gtk::make_managed<Gtk::Frame>("RTSP URL");
     auto url_box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 10);
-    url_box->set_margin_top(10);
-    url_box->set_margin_bottom(10);
+    url_box->set_margin_top(5);
+    url_box->set_margin_bottom(5);
     url_box->set_margin_start(10);
     url_box->set_margin_end(10);
 
     // URL entry
     url_entry = Gtk::make_managed<Gtk::Entry>();
     url_entry->set_placeholder_text("rtsp://example.com:554/stream");
-    url_entry->set_text("rtsp://192.168.55.1:8554/payload"); // Default
+    std::string default_rtsp_url = std::string("rtsp://") + udp_ip_target + ":8554/payload";
+    url_entry->set_text(default_rtsp_url); // Default from payloadsdk.h
     url_entry->signal_activate().connect(sigc::mem_fun(*this, &PayloadSettingsTab::on_url_entry_activate));
     url_box->pack_start(*url_entry, Gtk::PACK_EXPAND_WIDGET);
 
     // Control buttons
     play_button = Gtk::make_managed<Gtk::Button>("Play");
     stop_button = Gtk::make_managed<Gtk::Button>("Stop");
-    
+    fullscreen_button = Gtk::make_managed<Gtk::Button>("Fullscreen");
+
     play_button->signal_clicked().connect(sigc::mem_fun(*this, &PayloadSettingsTab::on_play_button_clicked));
     stop_button->signal_clicked().connect(sigc::mem_fun(*this, &PayloadSettingsTab::on_stop_button_clicked));
-    
+    fullscreen_button->signal_clicked().connect(sigc::mem_fun(*this, &PayloadSettingsTab::toggle_fullscreen));
+
     stop_button->set_sensitive(false);
-    
+    fullscreen_button->set_sensitive(false);
+
     url_box->pack_start(*play_button, Gtk::PACK_SHRINK);
     url_box->pack_start(*stop_button, Gtk::PACK_SHRINK);
+    url_box->pack_start(*fullscreen_button, Gtk::PACK_SHRINK);
     
     url_frame->add(*url_box);
     box->pack_start(*url_frame, Gtk::PACK_SHRINK);
@@ -840,22 +865,32 @@ play_stream(const std::string& rtsp_url) {
     play_button->set_sensitive(false);
     stop_button->set_sensitive(true);
     url_entry->set_sensitive(false);
+    if (fullscreen_button) {
+        fullscreen_button->set_sensitive(true);
+    }
 }
 
-void 
+void
 PayloadSettingsTab::
 stop_stream() {
+    if (is_fullscreen) {
+        exit_fullscreen();
+    }
+
     if (pipeline) {
         gst_element_set_state(pipeline, GST_STATE_NULL);
     }
-    
+
     cleanup_gstreamer();
-    
+
     is_playing = false;
     play_button->set_sensitive(true);
     stop_button->set_sensitive(false);
     url_entry->set_sensitive(true);
-    
+    if (fullscreen_button) {
+        fullscreen_button->set_sensitive(false);
+    }
+
     // Clear video area
     video_area->queue_draw();
 }
@@ -881,30 +916,159 @@ cleanup_gstreamer() {
     videosink = nullptr;
 }
 
-void 
+void
 PayloadSettingsTab::
 on_play_button_clicked() {
     std::string url = url_entry->get_text();
     if (url.empty()) {
         return;
     }
-    
+
     play_stream(url);
+    if (fullscreen_button) {
+        fullscreen_button->set_sensitive(true);
+    }
 }
 
-void 
+void
 PayloadSettingsTab::
 on_stop_button_clicked() {
+    if (is_fullscreen) {
+        exit_fullscreen();
+    }
     stop_stream();
+    if (fullscreen_button) {
+        fullscreen_button->set_sensitive(false);
+    }
 }
 
-void 
+void
 PayloadSettingsTab::
 on_url_entry_activate() {
     on_play_button_clicked();
 }
 
-bool 
+void
+PayloadSettingsTab::
+toggle_fullscreen() {
+    if (is_fullscreen) {
+        exit_fullscreen();
+    } else {
+        enter_fullscreen();
+    }
+}
+
+void
+PayloadSettingsTab::
+enter_fullscreen() {
+    if (!is_playing || is_fullscreen) {
+        return;
+    }
+
+    // Create fullscreen window
+    fullscreen_window = Gtk::make_managed<Gtk::Window>();
+    fullscreen_window->set_title("Video Fullscreen");
+    fullscreen_window->fullscreen();
+    fullscreen_window->set_decorated(false);
+
+    // Create video area for fullscreen
+    fullscreen_video_area = Gtk::make_managed<Gtk::DrawingArea>();
+    fullscreen_video_area->set_size_request(1920, 1080);
+    fullscreen_video_area->set_double_buffered(false);
+    fullscreen_video_area->set_vexpand(true);
+    fullscreen_video_area->set_hexpand(true);
+
+    // Add events for mouse click (for touch/tracking)
+    fullscreen_video_area->add_events(Gdk::BUTTON_PRESS_MASK);
+    fullscreen_video_area->signal_button_press_event().connect([this](GdkEventButton* event) {
+        if (is_touch && is_playing) {
+            double x_screen = event->x;
+            double y_screen = event->y;
+            int width = fullscreen_video_area->get_allocated_width();
+            int height = fullscreen_video_area->get_allocated_height();
+
+            double x_send = x_screen / width * 1920;
+            double y_send = y_screen / height * 1080;
+
+            double params[2] = {x_send, y_send};
+            on_button_clicked(PAYLOAD_TOUCH, params);
+        }
+        return true;
+    }, false);
+
+    // Handle key press for ESC to exit fullscreen
+    fullscreen_window->signal_key_press_event().connect(
+        sigc::mem_fun(*this, &PayloadSettingsTab::on_fullscreen_key_press)
+    );
+
+    fullscreen_window->add(*fullscreen_video_area);
+    fullscreen_window->show_all();
+
+    // Wait for window to be realized
+    while (!fullscreen_video_area->get_window()) {
+        Gtk::Main::iteration(false);
+    }
+
+    // Get window handle
+    GdkWindow* window = fullscreen_video_area->get_window()->gobj();
+    if (GDK_IS_X11_WINDOW(window)) {
+        fullscreen_window_handle = GDK_WINDOW_XID(window);
+    }
+
+    // Switch video output to fullscreen window
+    if (videosink && fullscreen_window_handle != 0) {
+        gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(videosink), fullscreen_window_handle);
+    }
+
+    is_fullscreen = true;
+    if (fullscreen_button) {
+        fullscreen_button->set_label("Exit Fullscreen");
+    }
+}
+
+void
+PayloadSettingsTab::
+exit_fullscreen() {
+    if (!is_fullscreen) {
+        return;
+    }
+
+    // Switch video back to normal window
+    if (videosink && video_window_handle != 0) {
+        gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(videosink), video_window_handle);
+    }
+
+    // Destroy fullscreen window
+    if (fullscreen_window) {
+        delete fullscreen_window;
+        fullscreen_window = nullptr;
+        fullscreen_video_area = nullptr;
+        fullscreen_window_handle = 0;
+    }
+
+    is_fullscreen = false;
+    if (fullscreen_button) {
+        fullscreen_button->set_label("Fullscreen");
+    }
+
+    // Redraw normal video area
+    if (video_area) {
+        video_area->queue_draw();
+    }
+}
+
+bool
+PayloadSettingsTab::
+on_fullscreen_key_press(GdkEventKey* event) {
+    // ESC key to exit fullscreen
+    if (event->keyval == GDK_KEY_Escape || event->keyval == GDK_KEY_F11) {
+        exit_fullscreen();
+        return true;
+    }
+    return false;
+}
+
+bool
 PayloadSettingsTab::
 on_video_area_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     if (!is_playing) {
@@ -1603,3 +1767,354 @@ update_payload_param(char* index, double value){
         }
     });
 }
+
+#ifdef MB1
+// ===== MB1 General Settings Group =====
+Gtk::Widget*
+PayloadSettingsTab::
+create_mb1_general_settings_group() {
+    auto frame = Gtk::make_managed<Gtk::Frame>("MB1 Settings");
+
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(10);
+    box->set_margin_bottom(10);
+    box->set_margin_start(10);
+    box->set_margin_end(10);
+
+    auto create_aligned_combo = [this](Gtk::ComboBoxText*& combo, const std::string& title,
+                                       const list_struct_t* buttons, int size, _index_notify index) {
+        auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+        auto label = Gtk::make_managed<Gtk::Label>(title);
+        label->set_size_request(120, -1);
+        label->set_halign(Gtk::ALIGN_START);
+        hbox->pack_start(*label, Gtk::PACK_SHRINK);
+
+        combo = Gtk::make_managed<Gtk::ComboBoxText>();
+        for (int i = 0; i < size; i++) {
+            combo->append(buttons[i].label);
+        }
+        combo->signal_changed().connect([this, combo, buttons, index]() {
+            int active = combo->get_active_row_number();
+            if (active >= 0) {
+                double value = buttons[active].value;
+                double params[1] = {value};
+                on_button_clicked(index, params);
+            }
+        });
+        combo->set_active(0);
+        hbox->pack_start(*combo, Gtk::PACK_EXPAND_WIDGET);
+        return hbox;
+    };
+
+    box->pack_start(*create_aligned_combo(setting_target_combo, "Target", mb1_setting_target_list,
+        sizeof(mb1_setting_target_list)/sizeof(mb1_setting_target_list[0]), CAM_SETTING_TARGET), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(rc_mode_combo, "RC Mode", mb1_rc_mode_list,
+        sizeof(mb1_rc_mode_list)/sizeof(mb1_rc_mode_list[0]), CAM_RC_MODE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(storage_type_combo, "Storage", mb1_storage_type_list,
+        sizeof(mb1_storage_type_list)/sizeof(mb1_storage_type_list[0]), CAM_STORAGE_TYPE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(object_detection_combo, "Object Detect", mb1_object_detection_list,
+        sizeof(mb1_object_detection_list)/sizeof(mb1_object_detection_list[0]), CAM_OBJECT_DETECTION), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(ir_isotherms_gain_combo, "Isotherms Gain", mb1_ir_isotherms_gain_list,
+        sizeof(mb1_ir_isotherms_gain_list)/sizeof(mb1_ir_isotherms_gain_list[0]), CAM_IR_ISOTHERMS_GAIN), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(gimbal_fw_flag_combo, "Gimbal FW Flag", mb1_gimbal_fw_flag_list,
+        sizeof(mb1_gimbal_fw_flag_list)/sizeof(mb1_gimbal_fw_flag_list[0]), CAM_GIMBAL_FW_FLAG), Gtk::PACK_SHRINK);
+
+    frame->add(*box);
+    return frame;
+}
+
+// ===== MB1 EO Advanced Group =====
+Gtk::Widget*
+PayloadSettingsTab::
+create_mb1_eo_advanced_group() {
+    auto frame = Gtk::make_managed<Gtk::Frame>("EO Advanced");
+
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(10);
+    box->set_margin_bottom(10);
+    box->set_margin_start(10);
+    box->set_margin_end(10);
+
+    auto create_aligned_combo = [this](Gtk::ComboBoxText*& combo, const std::string& title,
+                                       const list_struct_t* buttons, int size, _index_notify index) {
+        auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+        auto label = Gtk::make_managed<Gtk::Label>(title);
+        label->set_size_request(100, -1);
+        label->set_halign(Gtk::ALIGN_START);
+        hbox->pack_start(*label, Gtk::PACK_SHRINK);
+
+        combo = Gtk::make_managed<Gtk::ComboBoxText>();
+        for (int i = 0; i < size; i++) {
+            combo->append(buttons[i].label);
+        }
+        combo->signal_changed().connect([this, combo, buttons, index]() {
+            int active = combo->get_active_row_number();
+            if (active >= 0) {
+                double value = buttons[active].value;
+                double params[1] = {value};
+                on_button_clicked(index, params);
+            }
+        });
+        combo->set_active(0);
+        hbox->pack_start(*combo, Gtk::PACK_EXPAND_WIDGET);
+        return hbox;
+    };
+
+    box->pack_start(*create_aligned_combo(eo_scene_mode_combo, "Scene Mode", mb1_eo_scene_mode_list,
+        sizeof(mb1_eo_scene_mode_list)/sizeof(mb1_eo_scene_mode_list[0]), CAM_EO_SCENE_MODE), Gtk::PACK_SHRINK);
+
+    // AE Compensation
+    auto hbox1 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+    auto label1 = Gtk::make_managed<Gtk::Label>("AE Comp");
+    eo_ae_compensation_range = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    eo_ae_compensation_range->set_range(-12, 12);
+    eo_ae_compensation_range->set_increments(1, 1);
+    eo_ae_compensation_range->set_digits(0);
+    eo_ae_compensation_range->set_value(2);
+    eo_ae_compensation_range->signal_value_changed().connect([this]() {
+        if (eo_ae_compensation_range) {
+            double value = eo_ae_compensation_range->get_value();
+            double params[1] = {value};
+            on_button_clicked(CAM_EO_AE_COMPENSATION, params);
+        }
+    });
+    hbox1->pack_start(*label1, Gtk::PACK_SHRINK);
+    hbox1->pack_start(*eo_ae_compensation_range, Gtk::PACK_EXPAND_WIDGET);
+    box->pack_start(*hbox1, Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(eo_wb_combo, "White Balance", mb1_eo_wb_list,
+        sizeof(mb1_eo_wb_list)/sizeof(mb1_eo_wb_list[0]), CAM_EO_WHITE_BALANCE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(eo_iso_combo, "ISO", mb1_eo_iso_list,
+        sizeof(mb1_eo_iso_list)/sizeof(mb1_eo_iso_list[0]), CAM_EO_ISO), Gtk::PACK_SHRINK);
+
+    // Sharpness
+    auto hbox2 = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+    auto label2 = Gtk::make_managed<Gtk::Label>("Sharpness");
+    eo_sharpness_range = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    eo_sharpness_range->set_range(0, 6);
+    eo_sharpness_range->set_increments(1, 1);
+    eo_sharpness_range->set_digits(0);
+    eo_sharpness_range->set_value(2);
+    eo_sharpness_range->signal_value_changed().connect([this]() {
+        if (eo_sharpness_range) {
+            double value = eo_sharpness_range->get_value();
+            double params[1] = {value};
+            on_button_clicked(CAM_EO_SHARPNESS, params);
+        }
+    });
+    hbox2->pack_start(*label2, Gtk::PACK_SHRINK);
+    hbox2->pack_start(*eo_sharpness_range, Gtk::PACK_EXPAND_WIDGET);
+    box->pack_start(*hbox2, Gtk::PACK_SHRINK);
+
+    frame->add(*box);
+    return frame;
+}
+
+// ===== MB1 IR Advanced Group =====
+Gtk::Widget*
+PayloadSettingsTab::
+create_mb1_ir_advanced_group() {
+    auto frame = Gtk::make_managed<Gtk::Frame>("IR Advanced");
+
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(10);
+    box->set_margin_bottom(10);
+    box->set_margin_start(10);
+    box->set_margin_end(10);
+
+    // Create combo boxes with fixed label width
+    auto create_aligned_combo = [this](Gtk::ComboBoxText*& combo, const std::string& title,
+                                       const list_struct_t* buttons, int size, _index_notify index) {
+        auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+        auto label = Gtk::make_managed<Gtk::Label>(title);
+        label->set_size_request(100, -1);
+        label->set_halign(Gtk::ALIGN_START);
+        hbox->pack_start(*label, Gtk::PACK_SHRINK);
+
+        combo = Gtk::make_managed<Gtk::ComboBoxText>();
+        for (int i = 0; i < size; i++) {
+            combo->append(buttons[i].label);
+        }
+        combo->signal_changed().connect([this, combo, buttons, index]() {
+            int active = combo->get_active_row_number();
+            if (active >= 0) {
+                double value = buttons[active].value;
+                double params[1] = {value};
+                on_button_clicked(index, params);
+            }
+        });
+        combo->set_active(0);
+        hbox->pack_start(*combo, Gtk::PACK_EXPAND_WIDGET);
+        return hbox;
+    };
+
+    box->pack_start(*create_aligned_combo(ir_gain_mode_combo, "Gain Mode", mb1_ir_gain_mode_list,
+        sizeof(mb1_ir_gain_mode_list)/sizeof(mb1_ir_gain_mode_list[0]), CAM_IR_GAIN_MODE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(ir_contrast_mode_combo, "Contrast", mb1_ir_contrast_mode_list,
+        sizeof(mb1_ir_contrast_mode_list)/sizeof(mb1_ir_contrast_mode_list[0]), CAM_IR_CONTRAST_MODE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(ir_agc_mode_combo, "AGC Mode", mb1_ir_agc_mode_list,
+        sizeof(mb1_ir_agc_mode_list)/sizeof(mb1_ir_agc_mode_list[0]), CAM_IR_AGC_MODE), Gtk::PACK_SHRINK);
+
+    // AGC Linear Percent
+    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+    auto label = Gtk::make_managed<Gtk::Label>("AGC Linear %");
+    ir_agc_linear_percent_range = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    ir_agc_linear_percent_range->set_range(0, 100);
+    ir_agc_linear_percent_range->set_increments(10, 10);
+    ir_agc_linear_percent_range->set_digits(0);
+    ir_agc_linear_percent_range->set_value(0);
+    ir_agc_linear_percent_range->signal_value_changed().connect([this]() {
+        if (ir_agc_linear_percent_range) {
+            double value = ir_agc_linear_percent_range->get_value();
+            double params[1] = {value};
+            on_button_clicked(CAM_IR_AGC_LINEAR_PERCENT, params);
+        }
+    });
+    hbox->pack_start(*label, Gtk::PACK_SHRINK);
+    hbox->pack_start(*ir_agc_linear_percent_range, Gtk::PACK_EXPAND_WIDGET);
+    box->pack_start(*hbox, Gtk::PACK_SHRINK);
+
+    frame->add(*box);
+    return frame;
+}
+
+// ===== MB1 IR SpotMeter Group =====
+Gtk::Widget*
+PayloadSettingsTab::
+create_mb1_ir_spotmeter_group() {
+    auto frame = Gtk::make_managed<Gtk::Frame>("IR SpotMeter");
+
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(10);
+    box->set_margin_bottom(10);
+    box->set_margin_start(10);
+    box->set_margin_end(10);
+
+    auto create_aligned_combo = [this](Gtk::ComboBoxText*& combo, const std::string& title,
+                                       const list_struct_t* buttons, int size, _index_notify index) {
+        auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+        auto label = Gtk::make_managed<Gtk::Label>(title);
+        label->set_size_request(80, -1);
+        label->set_halign(Gtk::ALIGN_START);
+        hbox->pack_start(*label, Gtk::PACK_SHRINK);
+
+        combo = Gtk::make_managed<Gtk::ComboBoxText>();
+        for (int i = 0; i < size; i++) {
+            combo->append(buttons[i].label);
+        }
+        combo->signal_changed().connect([this, combo, buttons, index]() {
+            int active = combo->get_active_row_number();
+            if (active >= 0) {
+                double value = buttons[active].value;
+                double params[1] = {value};
+                on_button_clicked(index, params);
+            }
+        });
+        combo->set_active(0);
+        hbox->pack_start(*combo, Gtk::PACK_EXPAND_WIDGET);
+        return hbox;
+    };
+
+    box->pack_start(*create_aligned_combo(ir_spotmeter_mode_combo, "Mode", mb1_ir_spotmeter_mode_list,
+        sizeof(mb1_ir_spotmeter_mode_list)/sizeof(mb1_ir_spotmeter_mode_list[0]), CAM_IR_SPOTMETER_MODE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(ir_spotmeter_units_combo, "Units", mb1_ir_spotmeter_units_list,
+        sizeof(mb1_ir_spotmeter_units_list)/sizeof(mb1_ir_spotmeter_units_list[0]), CAM_IR_SPOTMETER_UNITS), Gtk::PACK_SHRINK);
+
+    // SpotMeter Size
+    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+    auto label = Gtk::make_managed<Gtk::Label>("Size");
+    ir_spotmeter_size_range = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    ir_spotmeter_size_range->set_range(16, 128);
+    ir_spotmeter_size_range->set_increments(4, 4);
+    ir_spotmeter_size_range->set_digits(0);
+    ir_spotmeter_size_range->set_value(16);
+    ir_spotmeter_size_range->signal_value_changed().connect([this]() {
+        if (ir_spotmeter_size_range) {
+            double value = ir_spotmeter_size_range->get_value();
+            double params[1] = {value};
+            on_button_clicked(CAM_IR_SPOTMETER_SIZE, params);
+        }
+    });
+    hbox->pack_start(*label, Gtk::PACK_SHRINK);
+    hbox->pack_start(*ir_spotmeter_size_range, Gtk::PACK_EXPAND_WIDGET);
+    box->pack_start(*hbox, Gtk::PACK_SHRINK);
+
+    frame->add(*box);
+    return frame;
+}
+
+// ===== MB1 IR Isotherm Group =====
+Gtk::Widget*
+PayloadSettingsTab::
+create_mb1_ir_isotherm_group() {
+    auto frame = Gtk::make_managed<Gtk::Frame>("IR Isotherm");
+
+    auto box = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_VERTICAL, 5);
+    box->set_margin_top(10);
+    box->set_margin_bottom(10);
+    box->set_margin_start(10);
+    box->set_margin_end(10);
+
+    auto create_aligned_combo = [this](Gtk::ComboBoxText*& combo, const std::string& title,
+                                       const list_struct_t* buttons, int size, _index_notify index) {
+        auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+        auto label = Gtk::make_managed<Gtk::Label>(title);
+        label->set_size_request(80, -1);
+        label->set_halign(Gtk::ALIGN_START);
+        hbox->pack_start(*label, Gtk::PACK_SHRINK);
+
+        combo = Gtk::make_managed<Gtk::ComboBoxText>();
+        for (int i = 0; i < size; i++) {
+            combo->append(buttons[i].label);
+        }
+        combo->signal_changed().connect([this, combo, buttons, index]() {
+            int active = combo->get_active_row_number();
+            if (active >= 0) {
+                double value = buttons[active].value;
+                double params[1] = {value};
+                on_button_clicked(index, params);
+            }
+        });
+        combo->set_active(0);
+        hbox->pack_start(*combo, Gtk::PACK_EXPAND_WIDGET);
+        return hbox;
+    };
+
+    box->pack_start(*create_aligned_combo(ir_isotherm_mode_combo, "Mode", mb1_ir_isotherm_mode_list,
+        sizeof(mb1_ir_isotherm_mode_list)/sizeof(mb1_ir_isotherm_mode_list[0]), CAM_IR_ISOTHERM_MODE), Gtk::PACK_SHRINK);
+
+    box->pack_start(*create_aligned_combo(ir_isotherm_units_combo, "Units", mb1_ir_isotherm_units_list,
+        sizeof(mb1_ir_isotherm_units_list)/sizeof(mb1_ir_isotherm_units_list[0]), CAM_IR_ISOTHERM_UNITS), Gtk::PACK_SHRINK);
+
+    // Isotherm Threshold
+    auto hbox = Gtk::make_managed<Gtk::Box>(Gtk::ORIENTATION_HORIZONTAL, 5);
+    auto label = Gtk::make_managed<Gtk::Label>("Threshold");
+    ir_isotherm_threshold_range = Gtk::make_managed<Gtk::Scale>(Gtk::ORIENTATION_HORIZONTAL);
+    ir_isotherm_threshold_range->set_range(0, 150);
+    ir_isotherm_threshold_range->set_increments(5, 5);
+    ir_isotherm_threshold_range->set_digits(0);
+    ir_isotherm_threshold_range->set_value(50);
+    ir_isotherm_threshold_range->signal_value_changed().connect([this]() {
+        if (ir_isotherm_threshold_range) {
+            double value = ir_isotherm_threshold_range->get_value();
+            double params[1] = {value};
+            on_button_clicked(CAM_IR_ISOTHERM_THRESHOLD, params);
+        }
+    });
+    hbox->pack_start(*label, Gtk::PACK_SHRINK);
+    hbox->pack_start(*ir_isotherm_threshold_range, Gtk::PACK_EXPAND_WIDGET);
+    box->pack_start(*hbox, Gtk::PACK_SHRINK);
+
+    frame->add(*box);
+    return frame;
+}
+#endif // MB1
