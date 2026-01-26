@@ -60,8 +60,10 @@ int main(int argc, char *argv[])
 
     gst_init(&argc, &argv);
 
+    std::string _port = "8554";
+
     std::string pipeline_desc =
-        "udpsrc multicast-group=239.255.0.1 port=8554 name=source ! "
+        "udpsrc multicast-group=239.255.0.1 name=source port=" + _port + " ! "
         "tsdemux name=demux ! "
         "queue max-size-buffers=0 max-size-bytes=0 max-size-time=0 name=videoQueue ! "
         "h264parse name=h264parse ! "
