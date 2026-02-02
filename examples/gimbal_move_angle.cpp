@@ -66,6 +66,21 @@ Config parseArgs(int argc, char* argv[]) {
     return config;
 }
 
+void onPayloadStatusChanged(int event, double* param){
+	// printf("%s %d \n", __func__, event);
+	switch(event){
+    case PAYLOAD_GB_ATTITUDE:{
+		// param[0]: pitch
+		// param[1]: roll
+		// param[2]: yaw
+
+		printf("Mount Orient : Pich: %.2f - Roll: %.2f - Yaw: %.2f\n", param[0], param[1], param[2]);
+		break;
+	}
+	default: break;
+	}
+}
+
 int main(int argc, char *argv[]){
 	printf("Starting Set gimbal mode example...\n");
 	signal(SIGINT,quit_handler);
@@ -82,12 +97,15 @@ int main(int argc, char *argv[]){
 	my_payload->checkPayloadConnection();
 	usleep(100000);
 
-	printf("Set gimbal RC mode \n");
-	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_RC_MODE, PAYLOAD_CAMERA_RC_MODE_STANDARD, PARAM_TYPE_UINT32);
+	printf("Set gimbal to FOLLOW mode \n");
+	my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_GIMBAL_MODE, PAYLOAD_CAMERA_GIMBAL_MODE_FOLLOW, PARAM_TYPE_UINT32);
 	usleep(100000);
 
+    // register function to recieve MAVlink msg ID : MAVLINK_MSG_ID_MOUNT_ORIENTATION
+    my_payload->regPayloadStatusChanged(onPayloadStatusChanged);
+
 	printf("Move gimbal pitch to %d deg, yaw to %d deg\n", cfg.pitch, cfg.yaw);
-#if 1
+#if 0
 	// for control the gimbal using MAVLink protocol v2
 	// has limitation for yaw (-180:180), for pitch(-90:90)
 	my_payload->setGimbalSpeed(cfg.pitch, 0 , cfg.yaw, INPUT_ANGLE);
@@ -98,7 +116,7 @@ int main(int argc, char *argv[]){
 	// only comaptible with the payload software v3.1.x and gimbal firmware v7.8.9 or higher
 	my_payload->setGimbalMovement(cfg.pitch, 0 , cfg.yaw, INPUT_ANGLE);
 #endif
-	usleep(500000);
+	usleep(1000000);
 
 	// close payload interface
 	try {
