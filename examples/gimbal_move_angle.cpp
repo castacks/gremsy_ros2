@@ -34,30 +34,45 @@ bool all_threads_init();
 void quit_handler(int sig);
 
 struct Config {
-    int pitch = -1;
-    int yaw = -1;
+    float pitch = 0.0f;
+    float yaw   = 0.0f;
+    bool pitch_set = false;
+    bool yaw_set   = false;
 };
 
-// Function to parse command-line arguments
 Config parseArgs(int argc, char* argv[]) {
     Config config;
     int opt;
 
     while ((opt = getopt(argc, argv, "p:y:")) != -1) {
         switch (opt) {
-            case 'p':
-                config.pitch = std::atoi(optarg);
+            case 'p': {
+                char* end;
+                config.pitch = std::strtof(optarg, &end);
+                if (*end != '\0') {
+                    std::cerr << "Invalid pitch value\n";
+                    std::exit(1);
+                }
+                config.pitch_set = true;
                 break;
-            case 'y':
-                config.yaw = std::atoi(optarg);
+            }
+            case 'y': {
+                char* end;
+                config.yaw = std::strtof(optarg, &end);
+                if (*end != '\0') {
+                    std::cerr << "Invalid yaw value\n";
+                    std::exit(1);
+                }
+                config.yaw_set = true;
                 break;
+            }
             default:
                 std::cerr << "Usage: " << argv[0] << " -p <pitch> -y <yaw>\n";
                 std::exit(1);
         }
     }
 
-    if (config.pitch == -1 || config.yaw == -1) {
+    if (!config.pitch_set || !config.yaw_set) {
         std::cerr << "Error: both -p and -y options are required.\n";
         std::cerr << "Usage: " << argv[0] << " -p <pitch> -y <yaw>\n";
         std::exit(1);
@@ -104,7 +119,7 @@ int main(int argc, char *argv[]){
     // register function to recieve MAVlink msg ID : MAVLINK_MSG_ID_MOUNT_ORIENTATION
     my_payload->regPayloadStatusChanged(onPayloadStatusChanged);
 
-	printf("Move gimbal pitch to %d deg, yaw to %d deg\n", cfg.pitch, cfg.yaw);
+	printf("Move gimbal pitch to %.2f deg, yaw to %.2f deg\n", cfg.pitch, cfg.yaw);
 #if 0
 	// for control the gimbal using MAVLink protocol v2
 	// has limitation for yaw (-180:180), for pitch(-90:90)
@@ -116,7 +131,7 @@ int main(int argc, char *argv[]){
 	// only comaptible with the payload software v3.1.x and gimbal firmware v7.8.9 or higher
 	my_payload->setGimbalMovement(cfg.pitch, 0 , cfg.yaw, INPUT_ANGLE);
 #endif
-	usleep(1000000);
+	usleep(5000000);
 
 	// close payload interface
 	try {
