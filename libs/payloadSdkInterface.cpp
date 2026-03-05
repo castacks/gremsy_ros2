@@ -923,7 +923,38 @@ setPayloadStreamBitrate(uint32_t cam_id, uint32_t bitrate){
     msg.param1 = 4;
     msg.param2 = 2;
     msg.param3 = cam_id;
-    msg.param4 = bitrate;
+    msg.param4 = 0;
+    msg.param5 = bitrate;
+    msg.confirmation = 1;
+
+    // --------------------------------------------------------------------------
+    //   ENCODE
+    // --------------------------------------------------------------------------
+    mavlink_message_t message;
+
+    mavlink_msg_command_long_encode_chan(SYS_ID, COMP_ID, port->get_mav_channel(), &message, &msg);
+
+    // --------------------------------------------------------------------------
+    //   WRITE
+    // --------------------------------------------------------------------------
+
+    // do the write
+    payload_interface->push_message_to_queue(message);
+}
+
+void 
+PayloadSdkInterface::
+setPayloadStreamResolution(uint32_t cam_id, uint32_t resolution_lv){
+    mavlink_command_long_t msg = {0};
+
+    msg.target_system = PAYLOAD_SYSTEM_ID;
+    msg.target_component = PAYLOAD_COMPONENT_ID;
+    msg.command = MAV_CMD_USER_4;
+    msg.param1 = 4;
+    msg.param2 = 2;
+    msg.param3 = cam_id;
+    msg.param4 = 1;
+    msg.param5 = resolution_lv;
     msg.confirmation = 1;
 
     // --------------------------------------------------------------------------
@@ -1373,6 +1404,11 @@ payload_recv_handle()
         mavlink_message_t msg;
         uint8_t msg_cnt = getNewMewssage(msg);
         if(msg_cnt){
+
+            static int __cnt__ =0;
+            // if(msg.compid == 154)
+            //     printf("%s, got Gimbal message, %d \n", __func__, __cnt__++);
+
             // SDK_LOG("Got %d message in queue ", msg_cnt);
             // SDK_LOG("   --> message %d from system_id: %d with component_id: %d ", msg.msgid, msg.sysid, msg.compid);
             if(msg.compid == PAYLOAD_COMPONENT_ID){

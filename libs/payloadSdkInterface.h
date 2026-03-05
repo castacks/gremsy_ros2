@@ -319,6 +319,9 @@ public:
     // bitrate is in bit per second
     void setPayloadStreamBitrate(uint32_t cam_id, uint32_t bitrate);
 
+    // set stream resolution
+    void setPayloadStreamResolution(uint32_t cam_id, uint32_t resolution_lv);
+
     // get the current stream bitrate
     uint32_t getPayloadStreamBitrate(); 
 

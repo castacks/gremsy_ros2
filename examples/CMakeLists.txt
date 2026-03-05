@@ -43,6 +43,7 @@ set(EXAMPLES
     payload_get_fov_status.cpp
     payload_get_component_info.cpp
     payload_set_camera_zoom_targetpos.cpp
+    payload_set_stream_resolution.cpp
 )
 endif()
 
