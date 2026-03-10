@@ -7,7 +7,6 @@
  * This chaging only apply in runtime, and does not saved to the database.
  * for a specific camera stream (EO or IR). The change is applied immediately.
  *
- * Does not support IR camera for now. It will be fixed at 640x512
  * 
  * Usage:
  *   ./payload_set_stream_resolution -d <device> -r <resolution level>
@@ -16,10 +15,17 @@
  *   -d 1  → EO Camera (Electro-Optical)
  *   -d 2  → IR Camera (Infrared)
  *
- * Allowed resolution level range:
- *   1: 1920x1080
- *   2: 1280x720
- *   3: 960x540
+ * Allowed EO resolution level range:
+ *   0: 1920x1080
+ *   1: 1280x720
+ *   2: 960x540
+ * 
+ * Allowed IR resolution level range:
+ *   0: 1280x1024
+ *   1: 640x512
+ *   2: 480x384
+ *   3: 320x256
+ *   4: 160x128
  *
  * Examples:
  *   ./payload_set_stream_resolution -d 1 -r 1   # Set EO stream resolution to 1920x1080
@@ -84,8 +90,7 @@ Config parseArgs(int argc, char* argv[]) {
                           << "  -r <resolution level>  The resolution in level\n\n"
                           << "Examples:\n"
                           << "  " << argv[0] << " -d 1 -r 1   # Set EO stream resolution to 1920x1080\n"
-                          << "  " << argv[0] << " -d 1 -r 2   # Set EO stream resolution to 1280x720\n"
-                          << "  " << argv[0] << " -d 1 -r 3   # Set EO stream resolution to 960x540\n"
+                          << "  " << argv[0] << " -d 2 -r 1   # Set IR stream resolution to 640x512\n"
                           << std::endl;
                 std::exit(0);
                 break;
@@ -106,11 +111,10 @@ Config parseArgs(int argc, char* argv[]) {
                   << "                1 = EO (Electro-Optical)\n"
                   << "                2 = IR (Infrared)\n"
                   << "  -r <resolution level>  The resolution in level\n\n"
-                  << "Notes: It is not support for IR camera now\n\n"
+
                   << "Examples:\n"
                   << "  " << argv[0] << " -d 1 -r 1   # Set EO stream resolution to 1920x1080\n"
-                  << "  " << argv[0] << " -d 1 -r 2   # Set EO stream resolution to 1280x720\n"
-                  << "  " << argv[0] << " -d 1 -r 3   # Set EO stream resolution to 960x540\n"
+                  << "  " << argv[0] << " -d 2 -r 1   # Set IR stream resolution to 640x512\n"
                   << std::endl;
         std::exit(1);
     }
@@ -121,11 +125,21 @@ Config parseArgs(int argc, char* argv[]) {
         std::exit(1);
     }
 
-    // Validate bitrate
-    if (config.resolution < 1 || config.resolution > 3) {
-        std::cerr << "[ERROR] Resolution level must be between 1 (1920x1080) and 3 (960x540).\n";
-        std::exit(1);
+
+    // Validate resolution
+    if(config.device == 1){
+        if (config.resolution < 0 || config.resolution > 2) {
+            std::cerr << "[ERROR] Resolution level for EO must be between 0 (1920x1080) and 2 (960x540).\n";
+            std::exit(1);
+        }
     }
+    else if(config.device == 2){
+        if (config.resolution < 0 || config.resolution > 4) {
+            std::cerr << "[ERROR] Resolution level for IR must be between 0 (1280x1024) and 4 (160x128).\n";
+            std::exit(1);
+        }
+    }
+    
 
     return config;
 }

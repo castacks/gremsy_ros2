@@ -1133,7 +1133,7 @@ setGimbalSpeed(float spd_pitch, float spd_roll, float spd_yaw, input_mode_t mode
 
 void 
 PayloadSdkInterface::
-setGimbalMovement(float pitch, float roll, float yaw, input_mode_t mode){
+setGimbalMove_MAVLinkV1(float pitch, float roll, float yaw, input_mode_t mode){
     mavlink_command_long_t msg = {0};
 
     msg.target_system = GIMBAL_SYSTEM_ID;

@@ -365,7 +365,7 @@ public:
      * If do angle control, the unit is degrees
      * * If do speed control, the unit is degrees/s
      **/
-    void setGimbalMovement(float pitch, float roll, float yaw, input_mode_t mode);
+    void setGimbalMove_MAVLinkV1(float pitch, float roll, float yaw, input_mode_t mode);
 
     /**
      * set camera zoom ZOOM_TYPE_CONTINUOUS

@@ -120,6 +120,7 @@ int main(int argc, char *argv[]){
     my_payload->regPayloadStatusChanged(onPayloadStatusChanged);
 
 	printf("Move gimbal pitch to %.2f deg, yaw to %.2f deg\n", cfg.pitch, cfg.yaw);
+
 #if 0
 	// for control the gimbal using MAVLink protocol v2
 	// has limitation for yaw (-180:180), for pitch(-90:90)
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]){
 	// use this function to control the gimbal using command_long
 	// no limitation range
 	// only comaptible with the payload software v3.1.x and gimbal firmware v7.8.9 or higher
-	my_payload->setGimbalMovement(cfg.pitch, 0 , cfg.yaw, INPUT_ANGLE);
+	my_payload->setGimbalMove_MAVLinkV1(cfg.pitch, 0 , cfg.yaw, INPUT_ANGLE);
 #endif
 	usleep(5000000);
 
