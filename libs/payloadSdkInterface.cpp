@@ -972,6 +972,36 @@ setPayloadStreamResolution(uint32_t cam_id, uint32_t resolution_lv){
     payload_interface->push_message_to_queue(message);
 }
 
+void 
+PayloadSdkInterface::
+setPayloadStreamProfile(uint32_t cam_id, uint32_t enc_profile){
+    mavlink_command_long_t msg = {0};
+
+    msg.target_system = PAYLOAD_SYSTEM_ID;
+    msg.target_component = PAYLOAD_COMPONENT_ID;
+    msg.command = MAV_CMD_USER_4;
+    msg.param1 = 4;
+    msg.param2 = 2;
+    msg.param3 = cam_id;
+    msg.param4 = 2;
+    msg.param5 = enc_profile;
+    msg.confirmation = 1;
+
+    // --------------------------------------------------------------------------
+    //   ENCODE
+    // --------------------------------------------------------------------------
+    mavlink_message_t message;
+
+    mavlink_msg_command_long_encode_chan(SYS_ID, COMP_ID, port->get_mav_channel(), &message, &msg);
+
+    // --------------------------------------------------------------------------
+    //   WRITE
+    // --------------------------------------------------------------------------
+
+    // do the write
+    payload_interface->push_message_to_queue(message);
+}
+
 uint32_t 
 PayloadSdkInterface::
 getPayloadStreamBitrate(){

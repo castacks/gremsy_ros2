@@ -322,6 +322,9 @@ public:
     // set stream resolution
     void setPayloadStreamResolution(uint32_t cam_id, uint32_t resolution_lv);
 
+    // set stream encoder profile
+    void setPayloadStreamProfile(uint32_t cam_id, uint32_t enc_profile);
+
     // get the current stream bitrate
     uint32_t getPayloadStreamBitrate(); 
 
