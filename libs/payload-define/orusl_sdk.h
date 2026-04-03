@@ -106,6 +106,10 @@ enum _zoom_super_resolution_factor{
     ZOOM_SUPER_RESOLUTION_30X
 };
 
+// EO Zoom Speed
+// values can be set from 0 to 7, step 1
+#define PAYLOAD_CAMERA_EO_ZOOM_SPEED    "C_V_Z_SPD"
+
 // Image freeze
 #define PAYLOAD_CAMERA_EO_FREEZE        "C_V_FREEZE"
 #define PAYLOAD_CAMERA_EO_FREEZE_OFF       3
@@ -273,6 +277,10 @@ enum _zoom_super_resolution_factor{
 
 // EO Manual focus value can be set from 0 to 61440, step 10
 #define PAYLOAD_CAMERA_VIDEO_FOCUS_VALUE              "C_V_FV"
+
+// EO Focus Speed
+// values can be set from 0 to 7, step 1
+#define PAYLOAD_CAMERA_EO_FOCUS_SPEED    "C_V_F_SPD"
 
 // EO ICR modes
 #define PAYLOAD_CAMERA_EO_ICR_MODE      "C_V_ICR"
