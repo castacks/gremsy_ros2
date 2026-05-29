@@ -75,6 +75,20 @@ typedef struct {
     uint8_t type;
 } cam_param_union_t;
 
+typedef struct
+{
+    int cam_id = 0;
+    int rec_status = 0;
+    uint64_t timestamp = 0;
+    uint64_t size = 0;
+    int duration = 0;
+    std::string url = "";
+} RecordStatus_t;
+
+struct StatusTextBuffer {
+    std::map<uint8_t, std::string> chunks;
+};
+
 enum param_type {
     PARAM_TYPE_UINT8 = 1,
     PARAM_TYPE_INT8,

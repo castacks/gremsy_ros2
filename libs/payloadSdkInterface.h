@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <chrono> // for get time
+#include <map>
 #include "payloadsdk.h"
 #include <functional>
 
@@ -23,7 +24,9 @@ enum payload_status_event_t{
     PAYLOAD_PARAMS,
     PAYLOAD_PARAM_EXT_ACK,
 
-    PAYLOAD_PARAM_CAM_FOV_STATUS
+    PAYLOAD_PARAM_CAM_FOV_STATUS,
+
+    PAYLOAD_RECORD_STATUS
 };
 
 enum {
@@ -138,6 +141,7 @@ public:
     typedef std::function<void(int event, double* param)> payload_status_callback_t;
     typedef std::function<void(int event, char* param_char, double* param_double)> payload_param_callback_t;
     typedef std::function<void(int event, char* param_char, double* param_double)> payload_streamInfo_callback_t;
+    typedef std::function<void(int event, char* param_char, double* param_double)> payload_recordInfo_callback_t;
 
     PayloadSdkInterface();
     PayloadSdkInterface(T_ConnInfo data);
@@ -154,6 +158,10 @@ public:
 
     void regPayloadStreamChanged(payload_streamInfo_callback_t func);
     payload_streamInfo_callback_t __notifyPayloadStreamChanged = NULL;
+
+    void regPayloadRecordInfoChanged(payload_recordInfo_callback_t func);
+    payload_recordInfo_callback_t __notifyPayloadRecordChanged = NULL;
+
 
     /**
      * Init connection to payload
@@ -353,6 +361,8 @@ private:
 
     uint32_t current_gimbal_mode;
     uint16_t current_attitude_flags;
+    
+    std::map<uint16_t, StatusTextBuffer> statustext_buffers;
 public:
     /*!<@brief: used to rotate gimbal for each axis depend on angular rate or angle mode
      * @para1,2,3 : value for each axis
@@ -441,5 +451,7 @@ public:
     void _handle_msg_device_attitude(mavlink_message_t* msg);
     void _handle_request_camera_fov_status(mavlink_message_t* msg);
     void _handle_request_component_info(mavlink_message_t* msg);
+    
+    void _handle_statustext(mavlink_message_t* msg);
 };
 #endif

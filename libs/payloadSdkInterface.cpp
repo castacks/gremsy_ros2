@@ -58,6 +58,13 @@ regPayloadStreamChanged(payload_streamInfo_callback_t func){
     __notifyPayloadStreamChanged = func;
 }
 
+void
+PayloadSdkInterface::
+regPayloadRecordInfoChanged(payload_recordInfo_callback_t func){
+    __notifyPayloadRecordChanged = func;
+}
+
+
 bool 
 PayloadSdkInterface::
 sdkInitConnection(){
@@ -1536,6 +1543,10 @@ payload_recv_handle()
                 _handle_request_component_info(&msg);
                 break;
             }    
+            case MAVLINK_MSG_ID_STATUSTEXT:{
+                _handle_statustext(&msg);
+                break;
+            }  
             default: break;
             }
         }else{
@@ -1787,5 +1798,55 @@ _handle_request_component_info(mavlink_message_t* msg){
         info.push_back(comp_info.serial_number);
 
         __notifyPayloadInfoChanged(PAYLOAD_COMP_INFO, info);
+    }
+}
+
+void 
+PayloadSdkInterface::
+_handle_statustext(mavlink_message_t* msg){
+    if (msg == nullptr) return;
+
+    mavlink_statustext_t st;
+    mavlink_msg_statustext_decode(msg, &st);
+
+    char chunk[51] = {0};
+    memcpy(chunk, st.text, 50);
+
+    size_t chunk_len = strnlen(chunk, 50);
+
+    // Case 1: short text
+    if (st.id == 0) {
+        if(__notifyPayloadRecordChanged){
+            double params[1] = {0.0};
+            __notifyPayloadRecordChanged(PAYLOAD_RECORD_STATUS, chunk, params);
+        }
+        return;
+    }
+
+    // Case 2: long text
+    auto& buf = statustext_buffers[st.id];
+
+    buf.chunks[st.chunk_seq] = std::string(chunk, chunk_len);
+
+    if (chunk_len == 50) {
+        return;
+    }
+
+    std::string full_text;
+    for (uint16_t i = 0; i <= st.chunk_seq; ++i) {
+        auto it = buf.chunks.find(static_cast<uint8_t>(i));
+
+        if (it == buf.chunks.end()) {
+            return;
+        }
+
+        full_text += it->second;
+    }
+
+    statustext_buffers.erase(st.id);
+
+    if(__notifyPayloadRecordChanged){
+        double params[1] = {0.0};
+        __notifyPayloadRecordChanged(PAYLOAD_RECORD_STATUS, const_cast<char*>(full_text.c_str()), params);
     }
 }

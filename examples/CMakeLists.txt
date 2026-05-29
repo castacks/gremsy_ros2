@@ -45,6 +45,8 @@ set(EXAMPLES
     payload_set_camera_zoom_targetpos.cpp
     payload_set_stream_resolution.cpp
     payload_set_stream_profile.cpp
+
+    payload_get_file_record.cpp
 )
 endif()
 
