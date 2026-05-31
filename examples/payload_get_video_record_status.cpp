@@ -1,3 +1,11 @@
+/**
+ * This is an example on how to get the status of the video recording and download the video file after it finished.
+ * We will use the STATUSTEXT message for the status
+ * 
+ * The steps will be:
+ * 1. 
+ **/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -33,12 +41,15 @@ T_ConnInfo s_conn = {
 
 bool exit_flag = false;
 std::string dir_save_record = "./";
+bool is_recording = false;
 
 // Signal handler to exit safely
 void quit_handler(int sig);
 
 char getch();
-void handle_record_video(bool record);
+void handle_record_video(bool power);
+
+std::string replaceString(std::string str, const std::string& from, const std::string& to);
 
 void onPayloadRecordStatusChanged(int event, char* param_char, double* param_double);
 
@@ -47,7 +58,7 @@ size_t writeCallback(void* ptr, size_t size, size_t nmemb, void* userdata);
 bool downloadVideo(const std::string& url, const std::string& dir_download);
 
 int main(int argc, char *argv[]) {
-    printf("Starting Get statustext Message example...\n");
+    SDK_LOG("Starting Get statustext Message example...");
     signal(SIGINT, quit_handler);
 
     // Create the Payload SDK object
@@ -55,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     // Initialize the payload connection
     my_payload->sdkInitConnection();
-    printf("Waiting for payload signal...\n");
+    SDK_LOG("Waiting for payload signal...");
 
     // register callback function
 	my_payload->regPayloadRecordInfoChanged(onPayloadRecordStatusChanged);
@@ -68,7 +79,7 @@ int main(int argc, char *argv[]) {
 
     my_payload->setPayloadCameraParam(PAYLOAD_CAMERA_RECORD_SRC, PAYLOAD_CAMERA_RECORD_BOTH, PARAM_TYPE_UINT32);
 
-    bool do_record = false;
+    SDK_LOG("\n[INPUT] Press r to start the video record");
 
     // Wait and exit
     while(!exit_flag){
@@ -78,8 +89,12 @@ int main(int argc, char *argv[]) {
         std::cin >> input;
 
         if (input == 'r'){
-            do_record = !do_record;
-            handle_record_video(do_record);
+            // starting the video reocrd
+            handle_record_video(1);
+        }
+        else if (input == 's'){
+            // stop the video record
+            handle_record_video(0);
         }
             
 
@@ -92,7 +107,7 @@ int main(int argc, char *argv[]) {
 
 // ---------------- Clean exit handler ----------------
 void quit_handler(int sig) {
-    printf("\n[INFO] Terminating at user request...\n");
+    SDK_LOG("[INFO] Terminating at user request...");
     exit_flag = true;
 
     if (my_payload != nullptr) {
@@ -121,46 +136,81 @@ char getch(){
     return ch;
 }
 
-void handle_record_video(bool record){
-    if(record){
-        printf("Start Recording \n");
+void handle_record_video(bool power){
+    if(power){
+        if(is_recording){
+            SDK_LOG("[INFO] The recording is running. Skip");
+            return;
+        }
+
+        SDK_LOG("[INFO] Start Recording");
         my_payload->setPayloadCameraRecordVideoStart();
+        is_recording = true;
     }
     else{
-        printf("Stop Recording \n");
+        if(!is_recording){
+            SDK_LOG("[INFO] The recording is not running. Skip");
+            return;
+        }
+
+        SDK_LOG("[INFO] Stop Recording");
         my_payload->setPayloadCameraRecordVideoStop();
+        is_recording = false;
     }
 }
 
+static int _record_status_prev = -1;
 void onPayloadRecordStatusChanged(int event, char* param_char, double* param_double){
 
 	switch(event){
 	case PAYLOAD_RECORD_STATUS:{
-        printf("\n%s\n", param_char);
-
         RecordStatus_t info;
 
         if (parseRecordStatus(param_char, info))
         {
-            printf("cam_id     = %d\n", info.cam_id);
-            printf("rec_status = %d\n", info.rec_status);
-            printf("timestamp  = %llu\n", info.timestamp);
-            printf("size       = %llu\n", info.size);
-            printf("duration   = %d\n", info.duration);
-            printf("url        = %s\n", info.url.c_str());
+            if(info.rec_status !=  _record_status_prev){
+                _record_status_prev = info.rec_status;
 
-            if (info.rec_status == 1)
-            {
-                printf("Payload is Recording\n");
-            }
-            else
-            {
-                printf("Payload has finished recording.\n");
-            }
+                // only print when the status changed
 
-            if(info.url != ""){
-                downloadVideo(info.url, dir_save_record);
+                // print the raw input
+                SDK_LOG("%s", param_char);
+
+                SDK_LOG("rec_src    = %d", info.rec_src);
+                SDK_LOG("rec_status = %d", info.rec_status);
+                SDK_LOG("rec_time   = %d", info.rec_time);
+                SDK_LOG("timestamp  = %llu", info.timestamp);
+                SDK_LOG("size       = %llu", info.size);
+                SDK_LOG("duration   = %d", info.duration);
+                SDK_LOG("url        = %s", info.url.c_str());
+
+                if (info.rec_status == 1)
+                {
+                    SDK_LOG("Payload is Recording");
+                    is_recording = true;
+
+                    SDK_LOG("\n[INPUT] Press s to stop the video record");
+                }
+                else
+                {
+                    SDK_LOG("Payload has finished recording.");
+
+                    SDK_LOG("Start downlading the video file at %s", info.url.c_str());
+                }
+
+                if(info.url != ""){
+                    downloadVideo(info.url, dir_save_record);
+
+                    if(info.rec_src == PAYLOAD_CAMERA_RECORD_BOTH){
+                        std::string ir_url = replaceString(info.url, "VID_EO_", "VID_IR_");
+                        if (ir_url != "")
+                            downloadVideo(ir_url, dir_save_record);
+                    }
+                }
             }
+        }
+        else{
+            SDK_LOG("[ERROR] Can not parse the STATUSTEXT.");
         }
 
 		break;
@@ -179,32 +229,38 @@ bool parseRecordStatus(const char* jsonStr, RecordStatus_t& info){
     std::istringstream iss(jsonStr);
 
     if (!Json::parseFromStream(builder, iss, &root, &errs)){
-        printf("JSON parse error: %s\n", errs.c_str());
+        SDK_LOG("JSON parse error: %s", errs.c_str());
         return false;
     }
 
     if (!root.isObject()){
-        printf("JSON root is not object\n");
+        SDK_LOG("JSON root is not object");
         return false;
     }
 
-    if (!root.isMember("cam_id") || !root["cam_id"].isInt()){
-        printf("Missing or invalid field: cam_id\n");
+    if (!root.isMember("rec_src") || !root["rec_src"].isInt()){
+        SDK_LOG("Missing or invalid field: rec_src");
         return false;
     }
 
     if (!root.isMember("rec_status") || !root["rec_status"].isInt()){
-        printf("Missing or invalid field: rec_status\n");
+        SDK_LOG("Missing or invalid field: rec_status");
+        return false;
+    }
+    
+    if (!root.isMember("rec_time") || !root["rec_time"].isInt()){
+        SDK_LOG("Missing or invalid field: rec_time");
         return false;
     }
 
     if (!root.isMember("timestamp") || !root["timestamp"].isUInt64()){
-        printf("Missing or invalid field: timestamp\n");
+        SDK_LOG("Missing or invalid field: timestamp");
         return false;
     }
 
-    info.cam_id     = root["cam_id"].asInt();
+    info.rec_src    = root["rec_src"].asInt();
     info.rec_status = root["rec_status"].asInt();
+    info.rec_time   = root["rec_time"].asInt();
     info.timestamp  = root["timestamp"].asUInt64();
 
     info.size = 0;
@@ -217,19 +273,19 @@ bool parseRecordStatus(const char* jsonStr, RecordStatus_t& info){
     if (info.rec_status == 0){
         if (!root.isMember("size") || !root["size"].isUInt64())
         {
-            printf("Missing or invalid field: size\n");
+            SDK_LOG("Missing or invalid field: size");
             return false;
         }
 
         if (!root.isMember("duration") || !root["duration"].isInt())
         {
-            printf("Missing or invalid field: duration\n");
+            SDK_LOG("Missing or invalid field: duration");
             return false;
         }
 
         if (!root.isMember("url") || !root["url"].isString())
         {
-            printf("Missing or invalid field: url\n");
+            SDK_LOG("Missing or invalid field: url");
             return false;
         }
 
@@ -240,7 +296,7 @@ bool parseRecordStatus(const char* jsonStr, RecordStatus_t& info){
         return true;
     }
 
-    printf("Invalid rec_status: %d\n", info.rec_status);
+    SDK_LOG("Invalid rec_status: %d", info.rec_status);
     return false;
 }
 
@@ -266,14 +322,14 @@ bool downloadVideo(const std::string& url, const std::string& dir_download){
     CURL* curl = curl_easy_init();
     if (!curl)
     {
-        printf("curl_easy_init failed\n");
+        SDK_LOG("curl_easy_init failed");
         return false;
     }
 
     FILE* fp = fopen(file_path.c_str(), "wb");
     if (!fp)
     {
-        printf("Cannot create file: %s\n", file_path.c_str());
+        SDK_LOG("Cannot create file: %s", file_path.c_str());
         curl_easy_cleanup(curl);
         return false;
     }
@@ -291,11 +347,27 @@ bool downloadVideo(const std::string& url, const std::string& dir_download){
 
     if (res != CURLE_OK)
     {
-        printf("Download failed: %s\n",
+        SDK_LOG("Download failed: %s",
                curl_easy_strerror(res));
+        
+        SDK_LOG("Exit with error");
+        exit(-1);
+        
         return false;
     }
 
-    printf("Download success: %s\n", file_path.c_str());
+    SDK_LOG("Download success: %s", file_path.c_str());
+    
     return true;
+}
+
+std::string replaceString(std::string str, const std::string& from, const std::string& to){
+    auto pos = str.find(from);
+    if (pos == std::string::npos){
+        SDK_LOG("Cannot find '%s' in '%s'", from.c_str(), str.c_str());
+        return "";
+    }
+
+    str.replace(pos, from.length(), to);
+    return str;
 }

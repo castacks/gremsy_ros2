@@ -77,12 +77,13 @@ typedef struct {
 
 typedef struct
 {
-    int cam_id = 0;
-    int rec_status = 0;
-    uint64_t timestamp = 0;
-    uint64_t size = 0;
-    int duration = 0;
-    std::string url = "";
+    int rec_src          = 0;
+    int rec_status       = 0;
+    uint32_t rec_time    = 0;
+    uint64_t timestamp   = 0;
+    uint64_t size        = 0;
+    int duration         = 0;
+    std::string url      = "";
 } RecordStatus_t;
 
 struct StatusTextBuffer {
