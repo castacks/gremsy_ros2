@@ -160,6 +160,8 @@ void handle_record_video(bool power){
 }
 
 static int _record_status_prev = -1;
+static int _cam_rec_status_prev = -1;
+static int _cam_rec_time_prev = -1;
 void onPayloadRecordStatusChanged(int event, char* param_char, double* param_double){
 
 	switch(event){
@@ -168,43 +170,72 @@ void onPayloadRecordStatusChanged(int event, char* param_char, double* param_dou
 
         if (parseRecordStatus(param_char, info))
         {
-            if(info.rec_status !=  _record_status_prev){
-                _record_status_prev = info.rec_status;
-
-                // only print when the status changed
+            // check if the status changed
+            if((info.rec_status != _cam_rec_status_prev)
+                || (info.rec_time != _cam_rec_time_prev))
+            {
+                _cam_rec_status_prev = info.rec_status;
+                _cam_rec_time_prev = info.rec_time;     // for print the debug when the camera is recording
 
                 // print the raw input
                 SDK_LOG("%s", param_char);
 
-                SDK_LOG("rec_src    = %d", info.rec_src);
-                SDK_LOG("rec_status = %d", info.rec_status);
-                SDK_LOG("rec_time   = %d", info.rec_time);
-                SDK_LOG("timestamp  = %llu", info.timestamp);
-                SDK_LOG("size       = %llu", info.size);
-                SDK_LOG("duration   = %d", info.duration);
-                SDK_LOG("url        = %s", info.url.c_str());
-
-                if (info.rec_status == 1)
+                if(info.rec_status ==  1)
                 {
-                    SDK_LOG("Payload is Recording");
-                    is_recording = true;
+                    // the camera is recording the video
 
-                    SDK_LOG("\n[INPUT] Press s to stop the video record");
+                    // store the flag for checking the stop
+                    _record_status_prev = info.rec_status;
+
+                    SDK_LOG("rec_src    = %d", info.rec_src);
+                    SDK_LOG("rec_status = %d", info.rec_status);
+                    SDK_LOG("rec_time   = %d", info.rec_time);
+                    SDK_LOG("timestamp  = %llu", info.timestamp);
+                    SDK_LOG("size       = %llu", info.size);
+                    SDK_LOG("duration   = %d", info.duration);
+                    SDK_LOG("url        = %s", info.url.c_str());
+
+                    if (info.rec_status == 1)
+                    {
+                        SDK_LOG("Payload is Recording");
+                        is_recording = true;
+
+                        SDK_LOG("\n[INPUT] Press s to stop the video record");
+                    }
+                    else
+                    {
+                        SDK_LOG("Payload has finished recording.");
+
+                        SDK_LOG("Start downloading the video file at %s", info.url.c_str());
+                    }
                 }
-                else
+                else if(info.rec_status == 0)
                 {
-                    SDK_LOG("Payload has finished recording.");
+                    // if the camera stoped record
 
-                    SDK_LOG("Start downlading the video file at %s", info.url.c_str());
-                }
+                    if(_record_status_prev == 1){
+                        // if the camera is recording then stop
+                        // check to download the files
 
-                if(info.url != ""){
-                    downloadVideo(info.url, dir_save_record);
+                        if(info.url != ""){
+                            SDK_LOG("Start to downlading the video files");
 
-                    if(info.rec_src == PAYLOAD_CAMERA_RECORD_BOTH){
-                        std::string ir_url = replaceString(info.url, "VID_EO_", "VID_IR_");
-                        if (ir_url != "")
-                            downloadVideo(ir_url, dir_save_record);
+                            downloadVideo(info.url, dir_save_record);
+
+                            if(info.rec_src == PAYLOAD_CAMERA_RECORD_BOTH){
+                                std::string ir_url = replaceString(info.url, "VID_EO_", "VID_IR_");
+                                if (ir_url != "")
+                                    downloadVideo(ir_url, dir_save_record);
+                            }
+
+                            SDK_LOG("Exit");
+                            exit(0);
+                        }
+                        else{
+                            SDK_LOG("[ERROR] Can not download. The URL is empty");
+                            SDK_LOG("Exit");
+                            exit(-1);
+                        }
                     }
                 }
             }
