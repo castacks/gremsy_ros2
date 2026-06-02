@@ -47,6 +47,7 @@ set(EXAMPLES
     payload_set_stream_profile.cpp
 
     payload_get_video_record_status.cpp
+    payload_set_standby_mode.cpp
 )
 endif()
 

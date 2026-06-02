@@ -333,6 +333,9 @@ public:
     // set stream encoder profile
     void setPayloadStreamProfile(uint32_t cam_id, uint32_t enc_profile);
 
+    // set standby mode
+    void setPayloadStandbyMode(bool mode);
+
     // get the current stream bitrate
     uint32_t getPayloadStreamBitrate(); 
 
