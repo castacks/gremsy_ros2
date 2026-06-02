@@ -115,7 +115,7 @@ char getch(){
 void printCommandMenu(){
     printf("\n");
     SDK_LOG("=== Command Menu ===");
-    SDK_LOG("Press '0': Enable Standby Mode");
-    SDK_LOG("Press '1': Disable Standby Mode");
+    SDK_LOG("Press '0': Disable Standby Mode");
+    SDK_LOG("Press '1': Enable Standby Mode");
     SDK_LOG("Press 'q': Quit example \n");
 }
